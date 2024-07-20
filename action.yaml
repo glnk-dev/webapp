@@ -1,0 +1,80 @@
+name: Build and Deploy glnk-webapp to GitHub Pages
+description: Build and Deploy glnk-webapp to GitHub Pages
+branding:
+  icon: book-open
+  color: yellow
+
+inputs:
+  GLNK_USERNAME:
+    description: "glnk-dev username"
+    required: true
+  GLNK_JSONPATH:
+    description: "glnk.json path"
+    required: false
+    default: glnk.json
+  GLNK_PUBLIC_URL:
+    description: "glnk.dev public URL"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: main
+        sparse-checkout: |
+          ${{ inputs.GLNK_JSONPATH }}
+
+    - uses: actions/checkout@v4
+      with:
+        repository: glnk-dev/webapp
+
+    - name: Prebuild dotenv
+      uses: cuchi/jinja2-action@v1.2.2
+      with:
+        template: main/${{ inputs.GLNK_JSONPATH }}
+        output_file: public/glnk.json
+      env:
+        GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+
+    - name: Prebuild dotenv
+      uses: cuchi/jinja2-action@v1.2.2
+      with:
+        template: .env.j2
+        output_file: .env
+      env:
+        GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+
+    - name: Prebuild index.html
+      uses: cuchi/jinja2-action@v1.2.2
+      with:
+        template: public/index.html.j2
+        output_file: public/index.html
+      env:
+        GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+
+    - name: Install NPM packages
+      shell: bash
+      run: npm install
+
+    - name: Build project
+      shell: bash
+      run: npm run build
+      env:
+        PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build
+
+    - name: Deploy to GitHub pages
+      id: deployment
+      uses: actions/deploy-pages@v4
