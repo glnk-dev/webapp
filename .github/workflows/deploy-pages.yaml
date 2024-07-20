@@ -1,0 +1,34 @@
+
+name: Build and Deploy app to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-deploy-gh-pages:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18.x
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+          name: glnk-webapp
+
+      - name: Deploy to GitHub pages
+        id: deployment
+        uses: actions/deploy-pages@v4
