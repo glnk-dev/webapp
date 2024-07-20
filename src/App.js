@@ -36,7 +36,12 @@ function App() {
     return null;
   };
 
-  const redirectUrl = getRedirectUrl(location.pathname);
+  // Utility function to trim trailing slash
+  const trimTrailingSlash = (path) => {
+    return path.replace(/\/$/, '');
+  };
+
+  const redirectUrl = getRedirectUrl(trimTrailingSlash(location.pathname));
   return (
     <Routes>
       <Route path="/" element={<TablePage />} />
