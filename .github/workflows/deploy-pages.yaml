@@ -1,11 +1,8 @@
-name: Build and Deploy app to GitHub Pages
+name: Build and Deploy app to GitHub Pages - Composite
 
 on:
   push:
     branches: [main]
-
-env:
-  GLNK_USERNAME: bazqux
 
 permissions:
   contents: read
@@ -17,38 +14,10 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Prebuild dotenv
-        uses: cuchi/jinja2-action@v1.2.2
+      - name: Build and Deploy glnk-dev Webapp to GitHub Pages
+        uses: glnk-dev/webapp@v0.1.1
         with:
-          template: .env.j2
-          output_file: .env
-
-      - name: Prebuild index.html
-        uses: cuchi/jinja2-action@v1.2.2
-        with:
-          template: public/index.html.j2
-          output_file: public/index.html
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Build project
-        run: npm run build
-        env:
-          PUBLIC_URL: "/webapp"
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build
-
-      - name: Deploy to GitHub pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          GLNK_USERNAME: quuz
+          GLNK_JSONPATH: public/glnk.json
+          GLNK_PUBLIC_URL: /webapp
+          GLNK_PATH_SEGMENTS: 1

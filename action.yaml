@@ -16,6 +16,10 @@ inputs:
     description: "glnk.dev public URL"
     required: false
     default: ""
+  GLNK_PATH_SEGMENTS:
+    description: "glnk.dev path segment count"
+    required: false
+    default: "0"
 
 runs:
   using: "composite"
@@ -54,6 +58,14 @@ runs:
         output_file: public/index.html
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+
+    - name: Prebuild 404.html
+      uses: cuchi/jinja2-action@v1.2.2
+      with:
+        template: public/404.html.j2
+        output_file: public/404.html
+      env:
+        GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
 
     - name: Install Node.js
       uses: actions/setup-node@v4
