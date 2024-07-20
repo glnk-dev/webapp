@@ -40,6 +40,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<TablePage />} />
+      <Route path="/google" element={<RedirectComponent redirectUrl="https://google.com" />} />
       <Route
         path="*"
         element={
