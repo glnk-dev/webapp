@@ -44,9 +44,7 @@ function App() {
         path="*"
         element={
           redirectUrl ? (
-            <RedirectComponent
-              redirectUrl={process.env.PUBLIC_URL + redirectUrl}
-            />
+            <RedirectComponent redirectUrl={redirectUrl} />
           ) : (
             <div>404 Not Found</div>
           )
@@ -59,7 +57,7 @@ function App() {
 // Function to fetch JSON configuration
 const fetchJson = async () => {
   try {
-    const response = await fetch("/glnk.json");
+    const response = await fetch(`${process.env.PUBLIC_URL}/glnk.json`);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
