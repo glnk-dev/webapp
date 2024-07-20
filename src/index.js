@@ -5,22 +5,10 @@ import App from "./App";
 import { BrowserRouter as Router } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 
-const getBasename = () => {
-  if (window.location.hostname === 'localhost') {
-    const path = window.location.pathname.split('/');
-    path.pop();
-    return path.join('/');
-  }
-  if (window.location.hostname.endsWith('github.io')) {
-    return '/webapp';
-  }
-  return '/';
-};
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Router basename={getBasename()}>
+    <Router basename={process.env.PUBLIC_URL}>
       <App />
     </Router>
   </React.StrictMode>
