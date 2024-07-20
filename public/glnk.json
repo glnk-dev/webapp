@@ -1,4 +1,4 @@
 {
-  "/home": "https://glnk-dev.github.io/webapp/",
+  "/google": "https://google.com",
   "/github/{$1}": "https://github.com/glnk-dev/{$1}"
 }
