@@ -37,7 +37,6 @@ function App() {
   };
 
   const redirectUrl = getRedirectUrl(location.pathname);
-
   return (
     <Routes>
       <Route path="/" element={<TablePage />} />
@@ -45,7 +44,7 @@ function App() {
         path="*"
         element={
           redirectUrl ? (
-            <RedirectComponent redirectUrl={redirectUrl} />
+            <RedirectComponent redirectUrl={`{process.env.PUBLIC_URL}{redirectUrl}`} />
           ) : (
             <div>404 Not Found</div>
           )

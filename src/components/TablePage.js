@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 
 const TablePage = () => {
   const [links, setLinks] = useState([]);
-  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || 'defaultUsername';
-  const publicUrl = process.env.PUBLIC_URL || '';
+  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || "defaultUsername";
+  const publicUrl = process.env.PUBLIC_URL || "";
 
   useEffect(() => {
     const jsonUrl = `${process.env.PUBLIC_URL}/glnk.json`;
@@ -38,7 +38,8 @@ const TablePage = () => {
           <a href="https://glnk.dev" className="text-blue-500 hover:underline">
             glnk.dev
           </a>
-          .<br />Get your custom URL before it's too late—register{" "}
+          .<br />
+          Get your custom URL before it's too late—register{" "}
           <a
             href="https://glnk.dev/register"
             className="text-blue-500 hover:underline"
