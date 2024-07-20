@@ -20,6 +20,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: glnk-dev/webapp
+
     - name: Checkout
       uses: actions/checkout@v4
       with:
@@ -27,11 +31,7 @@ runs:
         sparse-checkout: |
           ${{ inputs.GLNK_JSONPATH }}
 
-    - uses: actions/checkout@v4
-      with:
-        repository: glnk-dev/webapp
-
-    - name: Prebuild dotenv
+    - name: Prebuild glnk.json
       uses: cuchi/jinja2-action@v1.2.2
       with:
         template: main/${{ inputs.GLNK_JSONPATH }}
