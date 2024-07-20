@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 
 const TablePage = () => {
   const [links, setLinks] = useState([]);
-  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME;
+  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || 'defaultUsername';
+  const publicUrl = process.env.PUBLIC_URL || '';
 
   useEffect(() => {
     const jsonUrl = `${process.env.PUBLIC_URL}/glnk.json`;
@@ -37,7 +38,14 @@ const TablePage = () => {
           <a href="https://glnk.dev" className="text-blue-500 hover:underline">
             glnk.dev
           </a>
-          .
+          .<br />Get your custom URL before it's too late—register{" "}
+          <a
+            href="https://glnk.dev/register"
+            className="text-blue-500 hover:underline"
+          >
+            here
+          </a>{" "}
+          now!
         </p>
       </header>
       <table className="min-w-full bg-white shadow-md rounded-lg">
@@ -55,7 +63,10 @@ const TablePage = () => {
           {links.map(({ subpath, redirectLink }) => (
             <tr key={subpath}>
               <td className="border-t py-2 px-4">
-                <a href={subpath} className="text-blue-500 hover:underline">
+                <a
+                  href={`${publicUrl}${subpath}`}
+                  className="text-blue-500 hover:underline"
+                >
                   {subpath}
                 </a>
               </td>
