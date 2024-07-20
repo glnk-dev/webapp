@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const TablePage = () => {
   const [links, setLinks] = useState([]);
+  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME;
 
   useEffect(() => {
     const jsonUrl = `${process.env.PUBLIC_URL}/glnk.json`;
@@ -25,10 +26,10 @@ const TablePage = () => {
         <h1 className="text-3xl font-bold">
           Go Links -{" "}
           <a
-            href="https://gcp.glnk.dev"
+            href={process.env.PUBLIC_URL}
             className="text-blue-500 hover:underline"
           >
-            gcp.glnk.dev
+            {glnkUsername}.glnk.dev
           </a>
         </h1>
         <p className="mt-2 text-lg">
