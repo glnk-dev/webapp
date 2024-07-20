@@ -1,0 +1,41 @@
+
+name: Build and Deploy app to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+env:
+   BUILD_PATH: .
+
+jobs:
+  build-deploy-gh-pages:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Install NPM packages
+        run: npm install
+        shell: bash
+        working-directory: ${{ env.BUILD_PATH }}
+
+      - name: Build project
+        run: npm run build
+        shell: bash
+        working-directory: ${{ env.BUILD_PATH }}
+
+      - name: Upload production-ready build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: production-files
+          path: ${{ env.BUILD_PATH }}/build
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.BUILD_PATH }}/build
