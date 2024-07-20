@@ -4,8 +4,9 @@ const TablePage = () => {
   const [links, setLinks] = useState([]);
 
   useEffect(() => {
+    const jsonUrl = `${process.env.PUBLIC_URL}/glnk.json`;
     // Fetch the JSON file from the public directory
-    fetch("/glnk.json")
+    fetch(jsonUrl)
       .then((response) => response.json())
       .then((data) => {
         // Convert JSON to array of objects for easier table rendering
