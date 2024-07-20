@@ -1,5 +1,5 @@
-name: Build and Deploy glnk-webapp to GitHub Pages
-description: Build and Deploy glnk-webapp to GitHub Pages
+name: Build and Deploy glnk-dev Webapp to GitHub Pages
+description: Build and Deploy glnk-dev Webapp to GitHub Pages
 branding:
   icon: book-open
   color: yellow
