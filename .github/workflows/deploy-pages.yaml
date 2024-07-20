@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  GLNK_USERNAME: foobar
+  GLNK_USERNAME: bazqux
 
 permissions:
   contents: read
