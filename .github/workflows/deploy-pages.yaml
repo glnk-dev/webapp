@@ -16,6 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prebuild dotenv
+        uses: cuchi/jinja2-action@v1.2.2
+        with:
+          template: .env.j2
+          output_file: .env
+
+      - name: Prebuild index.html
+        uses: cuchi/jinja2-action@v1.2.2
+        with:
+          template: public/index.html.j2
+          output_file: public/index.html
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
