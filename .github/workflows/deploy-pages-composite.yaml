@@ -19,4 +19,4 @@ jobs:
         with:
           GLNK_USERNAME: quuz
           GLNK_JSONPATH: public/glnk.json
-          GLNK_PUBLIC_URL: /webapp
+          GLNK_PUBLIC_URL: https://glnk-dev.github.io/webapp
