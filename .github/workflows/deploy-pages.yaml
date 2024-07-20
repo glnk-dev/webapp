@@ -31,7 +31,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: build
-          name: glnk-webapp
 
       - name: Deploy to GitHub pages
         id: deployment
