@@ -1,9 +1,12 @@
-
 name: Build and Deploy app to GitHub Pages
 
 on:
   push:
     branches: [main]
+
+permissions:
+  pages: write
+  id-token: write
 
 jobs:
   build-deploy-gh-pages:
