@@ -44,7 +44,7 @@ function App() {
         path="*"
         element={
           redirectUrl ? (
-            <RedirectComponent redirectUrl={process.env.PUBLIC_URL+redirectUrl} />
+            <RedirectComponent redirectUrl={redirectUrl} />
           ) : (
             <div>404 Not Found</div>
           )

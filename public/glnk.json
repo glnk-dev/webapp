@@ -1,7 +1,4 @@
 {
-  "/home": "https://console.cloud.google.com",
-  "/iam": "https://console.cloud.google.com/iam-admin/iam",
-  "/iam/{$1}": "https://console.cloud.google.com/iam-admin/iam?project={$1}",
-  "/gke": "https://console.cloud.google.com/kubernetes/list/overview?referrer=search",
-  "/gke/{$1}": "https://console.cloud.google.com/kubernetes/list/overview?referrer=search&project={$1}"
+  "/home": "https://glnk-dev.github.io/webapp/",
+  "/github/{$1}": "https://github.com/glnk-dev/{$1}"
 }
