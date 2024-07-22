@@ -51,7 +51,7 @@ function App() {
           redirectUrl ? (
             <RedirectComponent redirectUrl={redirectUrl} />
           ) : (
-            <div>404 Not Found</div>
+            <TablePage />
           )
         }
       />
