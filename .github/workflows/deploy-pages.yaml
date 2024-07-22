@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build and Deploy glnk-dev Webapp to GitHub Pages
-        uses: glnk-dev/webapp@latest
+        uses: glnk-dev/webapp@v0.1.3
         with:
           GLNK_USERNAME: quuz
           GLNK_JSONPATH: public/glnk.json
