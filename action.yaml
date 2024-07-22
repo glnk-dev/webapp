@@ -35,6 +35,14 @@ runs:
         sparse-checkout: |
           ${{ inputs.GLNK_JSONPATH }}
 
+    - name: Cache Jinja2 Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/jinja2
+        key: ${{ runner.os }}-jinja2-${{ hashFiles('**/*.j2', '**/*.json') }}
+        restore-keys: |
+          ${{ runner.os }}-jinja2-
+
     - name: Prebuild glnk.json
       uses: cuchi/jinja2-action@v1.2.2
       with:
@@ -71,6 +79,14 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 18.x
+
+    - name: Cache NPM packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
     - name: Install NPM packages
       shell: bash
