@@ -60,7 +60,7 @@ const TablePage = () => {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-left">
           {links.map(({ subpath, redirectLink }) => (
             <tr key={subpath}>
               <td className="border-t py-2 px-4">
