@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 
-const RedirectComponent = ({ redirectUrl }) => {
+const RedirectComponent = (props: { redirectUrl: string }) => {
+  const { redirectUrl } = props;
+
   useEffect(() => {
     window.location.href = redirectUrl;
   }, [redirectUrl]);
