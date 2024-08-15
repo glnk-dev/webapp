@@ -6,12 +6,12 @@ branding:
 
 inputs:
   GLNK_USERNAME:
-    description: "glnk-dev username"
+    description: "glnk.dev username"
     required: true
-  GLNK_JSONPATH:
-    description: "glnk.json path"
+  GLNK_URLMAP_PATH:
+    description: "glnk.dev URL map path"
     required: false
-    default: glnk.json
+    default: glnk.yaml
   GLNK_PUBLIC_URL:
     description: "glnk.dev public URL"
     required: false
@@ -33,21 +33,21 @@ runs:
       with:
         path: main
         sparse-checkout: |
-          ${{ inputs.GLNK_JSONPATH }}
+          ${{ inputs.GLNK_URLMAP_PATH }}
 
     - name: Cache Jinja2 Dependencies
       uses: actions/cache@v4
       with:
         path: ~/.cache/jinja2
-        key: ${{ runner.os }}-jinja2-${{ hashFiles('**/*.j2', '**/*.json') }}
+        key: ${{ runner.os }}-jinja2-${{ hashFiles('**/*.j2') }}
         restore-keys: |
           ${{ runner.os }}-jinja2-
 
-    - name: Prebuild glnk.json
+    - name: Prebuild glnk URL map
       uses: cuchi/jinja2-action@v1.2.2
       with:
-        template: main/${{ inputs.GLNK_JSONPATH }}
-        output_file: public/glnk.json
+        template: main/${{ inputs.GLNK_URLMAP_PATH }}
+        output_file: public/glnk.yaml
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
 

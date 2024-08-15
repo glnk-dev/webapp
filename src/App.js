@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import RedirectComponent from "./components/RedirectComponent";
+import YAML from 'yaml'
 import "./App.css";
 
 import TablePage from "./components/TablePage";
@@ -10,11 +11,11 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    const loadJson = async () => {
-      const json = await fetchJson();
-      setRedirectMap(json);
+    const loadUrlMap = async () => {
+      const urlMap = await fetchUrlMap();
+      setRedirectMap(urlMap);
     };
-    loadJson();
+    loadUrlMap();
   }, []);
 
   // Find the matching URL and replace dynamic segments
@@ -59,16 +60,18 @@ function App() {
   );
 }
 
-// Function to fetch JSON configuration
-const fetchJson = async () => {
+// Function to fetch URL map configuration
+const fetchUrlMap = async () => {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL}/glnk.json`);
+    const response = await fetch(`${process.env.PUBLIC_URL}/glnk.yaml`);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    return response.json();
+    // Fetch the YAML file content as plain text
+    const data = await response.text();
+    return YAML.parse(data);
   } catch (error) {
-    console.error("Failed to fetch JSON:", error);
+    console.error("Failed to fetch YAML:", error);
     return {};
   }
 };
