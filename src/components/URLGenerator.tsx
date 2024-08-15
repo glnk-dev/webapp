@@ -13,7 +13,7 @@ const extractVariables = (template: string) => {
 const generateUrl = (template: string, varMap: Record<string, string>) => {
   let result = template;
   Object.entries(varMap).forEach(([key, value]) => {
-    result = result.replace(`{${key}}`, value);
+    result = result.replace(`{${key}}`, value.length !== 0 ? value : key);
   });
   return result;
 };
@@ -25,12 +25,13 @@ const URLGenerator = (props: { template: string }) => {
   const [varMap, setVarMap] = useState(() => {
     const ret: Record<string, string> = {};
     variables.forEach((v) => {
-      ret[v] = v;
+      ret[v] = "";
     });
     return ret;
   });
 
   const generatedUrl = generateUrl(template, varMap);
+
   return (
     <div>
       {variables.map((v) => {
