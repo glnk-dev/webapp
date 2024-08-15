@@ -1,27 +1,17 @@
-import React, { useEffect, useState } from "react";
-import YAML from 'yaml'
+import URLGenerator from "../components/URLGenerator";
 
-const TablePage = () => {
-  const [links, setLinks] = useState([]);
+const TablePage = (props: { redirectMap: Record<string, string> }) => {
+  const { redirectMap } = props;
+
   const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || "defaultUsername";
   const publicUrl = process.env.PUBLIC_URL || "";
 
-  useEffect(() => {
-    const urlMapFile = `${process.env.PUBLIC_URL}/glnk.yaml`;
-    // Fetch the YAML file from the public directory
-    fetch(urlMapFile)
-      .then((response) => response.text())
-      .then((data) => {
-        // Convert YAML to array of objects for easier table rendering
-        const objArray = Object.entries(YAML.parse(data))
-        const linkArray = objArray.map(([key, value]) => ({
-          subpath: key,
-          redirectLink: value,
-        }));
-        setLinks(linkArray);
-      })
-      .catch((error) => console.error("Error fetching URL map:", error));
-  }, []);
+  const links = Object.entries(redirectMap).map(([key, value]) => {
+    return {
+      subpath: key,
+      redirectLink: value,
+    };
+  });
 
   return (
     <div className="App container mx-auto p-4 bg-gray-100">
@@ -54,7 +44,7 @@ const TablePage = () => {
       <table className="min-w-full bg-white shadow-md rounded-lg">
         <thead>
           <tr>
-            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700">
+            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700 w-1/4">
               Subpath
             </th>
             <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700">
@@ -74,12 +64,7 @@ const TablePage = () => {
                 </a>
               </td>
               <td className="border-t py-2 px-4">
-                <a
-                  href={redirectLink}
-                  className="text-blue-500 hover:underline"
-                >
-                  {redirectLink}
-                </a>
+                <URLGenerator template={redirectLink} />
               </td>
             </tr>
           ))}
