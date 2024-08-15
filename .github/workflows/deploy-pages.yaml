@@ -19,6 +19,6 @@ jobs:
         uses: glnk-dev/webapp@v0.1.3
         with:
           GLNK_USERNAME: quuz
-          GLNK_JSONPATH: public/glnk.json
+          GLNK_URLMAP_PATH: public/glnk.yaml
           GLNK_PUBLIC_URL: /webapp
           GLNK_PATH_SEGMENTS: 1

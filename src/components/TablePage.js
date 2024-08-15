@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import YAML from 'yaml'
 
 const TablePage = () => {
   const [links, setLinks] = useState([]);
@@ -6,19 +7,20 @@ const TablePage = () => {
   const publicUrl = process.env.PUBLIC_URL || "";
 
   useEffect(() => {
-    const jsonUrl = `${process.env.PUBLIC_URL}/glnk.json`;
-    // Fetch the JSON file from the public directory
-    fetch(jsonUrl)
-      .then((response) => response.json())
+    const urlMapFile = `${process.env.PUBLIC_URL}/glnk.yaml`;
+    // Fetch the YAML file from the public directory
+    fetch(urlMapFile)
+      .then((response) => response.text())
       .then((data) => {
-        // Convert JSON to array of objects for easier table rendering
-        const linkArray = Object.entries(data).map(([key, value]) => ({
+        // Convert YAML to array of objects for easier table rendering
+        const objArray = Object.entries(YAML.parse(data))
+        const linkArray = objArray.map(([key, value]) => ({
           subpath: key,
           redirectLink: value,
         }));
         setLinks(linkArray);
       })
-      .catch((error) => console.error("Error fetching JSON:", error));
+      .catch((error) => console.error("Error fetching URL map:", error));
   }, []);
 
   return (

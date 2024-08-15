@@ -63,14 +63,13 @@ function App() {
 // Function to fetch URL map configuration
 const fetchUrlMap = async () => {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL}/glnk.json`);
-    // const response = await fetch(`${process.env.PUBLIC_URL}/glnk.yaml`);
+    const response = await fetch(`${process.env.PUBLIC_URL}/glnk.yaml`);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    // console.log(response);
-    // return YAML.parse(response);
-    return response.json();
+    // Fetch the YAML file content as plain text
+    const data = await response.text();
+    return YAML.parse(data);
   } catch (error) {
     console.error("Failed to fetch YAML:", error);
     return {};
