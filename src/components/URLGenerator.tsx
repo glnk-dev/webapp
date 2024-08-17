@@ -41,7 +41,7 @@ const URLGenerator = ({
 
   return (
     <tr key={subpath}>
-      <td className="border-t py-2 px-4 items-center">
+      <td className="border-t py-2 px-4 flex flex-col">
         {variables.map((v) => (
           <input
             key={v}
