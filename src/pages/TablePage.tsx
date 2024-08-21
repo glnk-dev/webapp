@@ -2,9 +2,7 @@ import URLGenerator from "../components/URLGenerator";
 
 const TablePage = (props: { redirectMap: Record<string, string> }) => {
   const { redirectMap } = props;
-
   const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || "defaultUsername";
-  const publicUrl = process.env.PUBLIC_URL || "";
 
   const links = Object.entries(redirectMap).map(([key, value]) => {
     return {
@@ -54,19 +52,11 @@ const TablePage = (props: { redirectMap: Record<string, string> }) => {
         </thead>
         <tbody className="text-left">
           {links.map(({ subpath, redirectLink }) => (
-            <tr key={subpath}>
-              <td className="border-t py-2 px-4">
-                <a
-                  href={`${publicUrl}${subpath}`}
-                  className="text-blue-500 hover:underline"
-                >
-                  {subpath}
-                </a>
-              </td>
-              <td className="border-t py-2 px-4">
-                <URLGenerator template={redirectLink} />
-              </td>
-            </tr>
+            <URLGenerator
+              key={subpath}
+              subpath={subpath}
+              template={redirectLink}
+            />
           ))}
         </tbody>
       </table>
