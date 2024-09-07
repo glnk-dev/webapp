@@ -35,23 +35,13 @@ runs:
         sparse-checkout: |
           ${{ inputs.GLNK_URLMAP_PATH }}
 
-    - run: |
-        echo REACT_APP_GLNK_USERNAME=${{ inputs.GLNK_USERNAME }} > .env
-
-    - name: Prebuild index.html
-      uses: cuchi/jinja2-action@v1.2.2
-      with:
-        template: public/index.html.j2
-        output_file: public/index.html
+    - name: Replace template variables
+      shell: bash
+      run: |
+        echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
+        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
-
-    - name: Prebuild 404.html
-      uses: cuchi/jinja2-action@v1.2.2
-      with:
-        template: public/404.html.j2
-        output_file: public/404.html
-      env:
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
 
     - name: Install Node.js
