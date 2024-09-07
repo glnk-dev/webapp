@@ -38,6 +38,7 @@ runs:
     - name: Replace template variables
       shell: bash
       run: |
+        mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
         echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
