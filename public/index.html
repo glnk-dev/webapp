@@ -5,43 +5,57 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Go Link to Your URL - glnk.dev" />
+    <meta
+      name="description"
+      content="Welcome to glnk.dev, your go-to platform for creating personalized short links. Simplify URL management with custom paths, automated setup, and seamless redirection."
+    />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Go Links - GLNK_USERNAME.glnk.dev" />
-    <meta property="og:description" content="Easily manage your custom short links with glnk.dev." />
+    <meta
+      property="og:description"
+      content="Easily manage your custom short links with glnk.dev."
+    />
     <meta property="og:image" content="%PUBLIC_URL%/favicon.png" />
     <meta property="og:url" content="https://GLNK_USERNAME.glnk.dev" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Go Links - GLNK_USERNAME.glnk.dev" />
-    <meta name="twitter:description" content="Welcome to glnk.dev, your go-to solution for personalized short links with the <username>.glnk.dev domain." />
+    <meta
+      name="twitter:description"
+      content="Welcome to glnk.dev, your go-to solution for personalized short links with the <username>.glnk.dev domain."
+    />
     <meta name="twitter:image" content="%PUBLIC_URL%/favicon.png" />
     <meta name="twitter:url" content="https://GLNK_USERNAME.glnk.dev" />
 
     <!-- Additional SEO metadata -->
-    <meta name="keywords" content="short links, URL shortener, custom domains, glnk.dev, personalized domains, go links" />
-    <meta name="author" content="GLNK Team" />
+    <meta
+      name="keywords"
+      content="short links, URL shortener, custom domains, glnk.dev, personalized domains, go links"
+    />
+    <meta name="author" content="GLNK.DEV" />
     <meta name="robots" content="index, follow" />
 
     <!-- Web App Metadata -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Microdata for Organization and Website -->
+    <meta itemprop="name" content="glnk.dev" />
+    <meta itemprop="url" content="https://glnk.dev" />
+    <meta itemprop="logo" content="%PUBLIC_URL%/favicon.png" />
+    <meta itemprop="sameAs" content="https://github.com/glnk-dev" />
 
     <!-- Title -->
     <title>Go Links - GLNK_USERNAME.glnk.dev</title>
-
-    <!-- Additional Meta for project description and features -->
-    <meta name="project-description" content="glnk.dev is your solution for creating personalized short links, inspired by Google's go/link. Enjoy custom domains, paths, and easy-to-manage redirections." />
-    <meta name="features" content="Personalized Domains, Custom Paths, Automated Setup, GitHub Pages Integration, Simple Redirection" />
-
-    <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://trusted.cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" />
 
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
@@ -72,17 +86,17 @@
       })(window.location);
     </script>
   </head>
-  <body class="bg-gray-100">
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+  <body class="bg-gray-100" itemscope itemtype="http://schema.org/WebSite">
+    <header itemscope itemtype="http://schema.org/Organization">
+      <h1 itemprop="name">Go Links - glnk.dev</h1>
+      <meta itemprop="url" content="https://glnk.dev" />
+      <img itemprop="logo" src="%PUBLIC_URL%/favicon.png" alt="glnk.dev logo" />
+    </header>
+    <main>
+      <div id="root"></div>
+    </main>
+    <footer>
+      <p>&copy; 2024 GLNK.DEV Team. All rights reserved.</p>
+    </footer>
   </body>
 </html>
