@@ -39,6 +39,13 @@ const URLGenerator = ({
       setVarMap((prev) => ({ ...prev, [key]: ev.target.value }));
     };
 
+  const handleInputKeyDown =
+    (_: string) => (ev: React.KeyboardEvent<HTMLInputElement>) => {
+      if (ev.key === 'Enter') {
+        window.location.href = `${publicUrl}${generatedSubpath}`;
+      }
+    };
+
   return (
     <tr key={subpath}>
       <td className="border-t py-2 px-4 flex flex-col">
@@ -48,6 +55,7 @@ const URLGenerator = ({
             value={varMap[v]}
             placeholder={v}
             onChange={handleInputChange(v)}
+            onKeyDown={handleInputKeyDown(v)}
           />
         ))}
         <a
