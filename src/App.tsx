@@ -2,6 +2,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import RedirectComponent from "./components/RedirectComponent";
 import "./App.css";
 
+import Footer from "./components/Footer";
 import TablePage from "./pages/TablePage";
 import { getRedirectUrl, trimTrailingSlash } from "./lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -22,19 +23,22 @@ function App() {
   );
 
   return (
-    <Routes>
-      <Route path="/" element={<TablePage redirectMap={redirectMap} />} />
-      <Route
-        path="*"
-        element={
-          redirectUrl ? (
-            <RedirectComponent redirectUrl={redirectUrl} />
-          ) : (
-            <TablePage redirectMap={redirectMap} />
-          )
-        }
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<TablePage redirectMap={redirectMap} />} />
+        <Route
+          path="*"
+          element={
+            redirectUrl ? (
+              <RedirectComponent redirectUrl={redirectUrl} />
+            ) : (
+              <TablePage redirectMap={redirectMap} />
+            )
+          }
+        />
+      </Routes>
+      <Footer />
+    </>
   );
 }
 
