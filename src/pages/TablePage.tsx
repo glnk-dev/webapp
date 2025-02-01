@@ -39,18 +39,18 @@ const TablePage = (props: { redirectMap: Record<string, string> }) => {
           now!
         </p>
       </header>
-      <table className="min-w-full bg-white shadow-md rounded-lg">
+      <table className="min-w-full bg-white shadow-md rounded-lg text-left">
         <thead>
           <tr>
             <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700 w-1/4">
               Subpath
             </th>
-            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700">
+            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700" colSpan={2}>
               Redirect Link
             </th>
           </tr>
         </thead>
-        <tbody className="text-left">
+        <tbody>
           {links.map(({ subpath, redirectLink }) => (
             <URLGenerator
               key={subpath}
