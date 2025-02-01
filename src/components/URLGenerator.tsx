@@ -42,13 +42,14 @@ const URLGenerator = ({
   const handleInputKeyDown =
     (_: string) => (ev: React.KeyboardEvent<HTMLInputElement>) => {
       if (ev.key === 'Enter') {
+        console.log(`${publicUrl}${generatedSubpath}`)
         window.location.href = `${publicUrl}${generatedSubpath}`;
       }
     };
 
   return (
     <tr key={subpath}>
-      <td className="border-t py-2 px-4 flex flex-col">
+      <td className="border-t py-2 px-4 flex flex-col text-sm">
         {variables.map((v) => (
           <input
             key={v}
@@ -61,14 +62,26 @@ const URLGenerator = ({
         <a
           href={`${publicUrl}${generatedSubpath}`}
           className="text-blue-500 hover:underline"
+          title={`${publicUrl}${generatedSubpath}`}
         >
           {generatedSubpath}
         </a>
       </td>
-      <td className="border-t py-2 px-4">
-        <a href={generatedUrl} className="text-blue-500 hover:underline">
+      <td className="border-t py-2 px-4 truncate flex-col max-w-xs text-sm">
+        <a href={generatedUrl} className="text-blue-500 hover:underline" title={`${generatedUrl}`}>
           {generatedUrl}
         </a>
+      </td>
+      <td className="border-t py-2 px-2 items-center text-sm text-center">
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(generatedUrl);
+          }}
+          className="text-blue-500"
+          title="Copy"
+        >
+          📋
+        </button>
       </td>
     </tr>
   );
