@@ -1,19 +1,18 @@
-import { Route, Routes, useLocation } from "react-router-dom";
-import RedirectComponent from "./components/RedirectComponent";
-import "./App.css";
-
-import TablePage from "./pages/TablePage";
-import { getRedirectUrl, trimTrailingSlash } from "./lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { fetchUrlMap } from "./api";
+import { Route, Routes, useLocation } from 'react-router-dom';
+import RedirectComponent from './components/RedirectComponent';
+import './App.css';
+import TablePage from './pages/TablePage';
+import { getRedirectUrl, trimTrailingSlash } from './utils/url';
+import { useQuery } from '@tanstack/react-query';
+import { fetchUrlMap } from './api';
+import { QUERY_KEYS } from './constants';
 
 function App() {
   const location = useLocation();
 
-  const { data: redirectMap } = useQuery({
-    queryKey: ["url_map"],
+  const { data: redirectMap = {} } = useQuery({
+    queryKey: [QUERY_KEYS.URL_MAP],
     queryFn: fetchUrlMap,
-    initialData: {},
   });
 
   const redirectUrl = getRedirectUrl(

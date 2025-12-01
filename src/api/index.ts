@@ -1,18 +1,21 @@
-import YAML from "yaml";
+import YAML from 'yaml';
+import { RedirectMap } from '../types';
+import { YAML_FILE_PATH } from '../constants';
+import { getPublicUrl } from '../utils/env';
 
-const baseUrl = process.env.PUBLIC_URL;
-
-export const fetchUrlMap = async () => {
+export const fetchUrlMap = async (): Promise<RedirectMap> => {
   try {
-    const response = await fetch(`${baseUrl}/glnk.yaml`);
+    const baseUrl = getPublicUrl();
+    const response = await fetch(`${baseUrl}${YAML_FILE_PATH}`);
+
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      throw new Error(`Failed to fetch YAML: ${response.status} ${response.statusText}`);
     }
-    // Fetch the YAML file content as plain text
+
     const data = await response.text();
-    return YAML.parse(data) as Record<string, string>;
+    return YAML.parse(data) as RedirectMap;
   } catch (error) {
-    console.error("Failed to fetch YAML:", error);
+    console.error('Failed to fetch YAML:', error);
     return {};
   }
 };
