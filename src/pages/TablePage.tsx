@@ -1,65 +1,79 @@
-import URLGenerator from "../components/URLGenerator";
+import React, { useMemo } from 'react';
+import URLGenerator from '../components/URLGenerator';
+import { TablePageProps } from '../types';
+import { getGlnkUsername, getPublicUrl } from '../utils/env';
+import { GLNK_BASE_URL } from '../constants';
+import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 
-const TablePage = (props: { redirectMap: Record<string, string> }) => {
-  const { redirectMap } = props;
-  const glnkUsername = process.env.REACT_APP_GLNK_USERNAME || "defaultUsername";
+const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
+  const glnkUsername = getGlnkUsername();
+  const publicUrl = getPublicUrl();
 
-  const links = Object.entries(redirectMap).map(([key, value]) => {
-    return {
-      subpath: key,
-      redirectLink: value,
-    };
-  });
+  const links = useMemo(
+    () =>
+      Object.entries(redirectMap).map(([key, value]) => ({
+        subpath: key,
+        redirectLink: value,
+      })),
+    [redirectMap]
+  );
 
   return (
-    <div className="App container mx-auto p-4 bg-gray-100">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">
-          Go Links -{" "}
-          <a
-            href={process.env.PUBLIC_URL}
-            className="text-blue-500 hover:underline"
-          >
-            {glnkUsername}.glnk.dev
-          </a>
-        </h1>
-        <p className="mt-2 text-lg">
-          Easily manage your custom short links with{" "}
-          <a href="https://glnk.dev" className="text-blue-500 hover:underline">
-            glnk.dev
-          </a>
-          .<br />
-          Get your custom URL before it's too late—register{" "}
-          <a
-            href="https://glnk.dev/register"
-            className="text-blue-500 hover:underline"
-          >
-            here
-          </a>{" "}
-          now!
-        </p>
-      </header>
-      <table className="min-w-full bg-white shadow-md rounded-lg text-left">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700 w-1/4">
-              Subpath
-            </th>
-            <th className="py-2 px-4 bg-gray-200 font-semibold text-gray-700" colSpan={2}>
-              Redirect Link
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {links.map(({ subpath, redirectLink }) => (
-            <URLGenerator
-              key={subpath}
-              subpath={subpath}
-              template={redirectLink}
-            />
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-screen bg-white">
+      <nav className="border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex items-center justify-between h-16">
+            <a
+              href={publicUrl}
+              className="text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors"
+            >
+              <span className="font-bold">{glnkUsername}</span>
+              <span className="text-gray-500">.glnk.dev</span>
+            </a>
+            <a
+              href={GLNK_BASE_URL}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Join glnk.dev"
+            >
+              <ExternalLinkIcon />
+              <span className="text-sm">Join glnk.dev</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+        {links.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Subpath
+                  </th>
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Redirect Link
+                  </th>
+                  <th className="w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {links.map(({ subpath, redirectLink }) => (
+                  <URLGenerator
+                    key={subpath}
+                    subpath={subpath}
+                    template={redirectLink}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-gray-500">No links configured yet.</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
