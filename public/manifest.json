@@ -1,6 +1,7 @@
 {
-  "short_name": "glnk-dev",
-  "name": "glnk-dev",
+  "short_name": "glnk.dev",
+  "name": "glnk.dev · Short Links, Your Way",
+  "description": "Create beautiful short links with your own glnk.dev domain",
   "icons": [
     {
       "src": "favicon.ico",
@@ -15,6 +16,10 @@
   ],
   "start_url": ".",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr"
 }

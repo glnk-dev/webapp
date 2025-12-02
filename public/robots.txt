@@ -1,3 +1,8 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+Disallow: /404.html
+
+# Sitemap
+Sitemap: https://GLNK_USERNAME.glnk.dev/sitemap.xml
