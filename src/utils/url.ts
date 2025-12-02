@@ -3,12 +3,13 @@ import { RedirectMap } from '../types';
 
 export const extractVariables = (template: string): string[] => {
   const extractedVars: string[] = [];
+  const pattern = new RegExp(VARIABLE_PATTERN.source, VARIABLE_PATTERN.flags);
   let match: RegExpExecArray | null;
-  
-  while ((match = VARIABLE_PATTERN.exec(template)) !== null) {
+
+  while ((match = pattern.exec(template)) !== null) {
     extractedVars.push(`{${match[1]}}`);
   }
-  
+
   return extractedVars;
 };
 
