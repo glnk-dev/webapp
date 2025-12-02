@@ -40,9 +40,13 @@ runs:
       run: |
         mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
         echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
+        echo REACT_APP_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
+        echo REACT_APP_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
 
     - name: Install Node.js
