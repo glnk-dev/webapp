@@ -1,7 +1,5 @@
 export const VARIABLE_PATTERN = /\{([^}]+)\}/g;
 
-export const DEFAULT_USERNAME = 'defaultUsername';
-
 export const GLNK_DOMAIN = 'glnk.dev';
 
 export const GLNK_BASE_URL = `https://${GLNK_DOMAIN}`;
