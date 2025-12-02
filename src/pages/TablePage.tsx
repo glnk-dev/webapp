@@ -5,6 +5,7 @@ import { getGlnkUsername, getPublicUrl } from '../utils/env';
 import { GLNK_BASE_URL } from '../constants';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
+import { LogoutIcon } from '../components/icons/LogoutIcon';
 import { useAuth } from '../contexts/AuthContext';
 
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
@@ -59,10 +60,11 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                 </span>
                 <button
                   onClick={logout}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Sign out"
                   type="button"
                 >
-                  Sign out
+                  <LogoutIcon />
                 </button>
               </div>
             ) : (
