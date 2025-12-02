@@ -35,6 +35,21 @@ runs:
         sparse-checkout: |
           ${{ inputs.GLNK_URLMAP_PATH }}
 
+    - id: auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v3
+      with:
+        workload_identity_provider: projects/1042177442694/locations/global/workloadIdentityPools/github/providers/github
+        service_account: glnk-dev@playground-365100.iam.gserviceaccount.com
+
+    - id: secrets
+      name: Get secrets from Google Secret Manager
+      uses: google-github-actions/get-secretmanager-secrets@v3
+      with:
+        secrets: |-
+          firebase_api_key:playground-365100/glnk-dev-firebase-api-key
+          firebase_app_id:playground-365100/glnk-dev-firebase-app-id
+
     - name: Replace template variables
       shell: bash
       run: |
@@ -45,8 +60,8 @@ runs:
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
-        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-        FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        FIREBASE_API_KEY: ${{ steps.secrets.outputs.firebase_api_key }}
+        FIREBASE_APP_ID: ${{ steps.secrets.outputs.firebase_app_id }}
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
 
     - name: Install Node.js
