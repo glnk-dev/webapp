@@ -25,4 +25,3 @@ githubProvider.addScope('user:email');
 
 export { auth };
 export default app as FirebaseApp;
-
