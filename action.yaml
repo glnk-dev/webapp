@@ -39,7 +39,7 @@ runs:
       name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v3
       with:
-        workload_identity_provider: projects/1042177442694/locations/global/workloadIdentityPools/github/providers/github
+        workload_identity_provider: projects/1042177442694/locations/global/workloadIdentityPools/github/providers/glnk-dev
         service_account: glnk-dev@playground-365100.iam.gserviceaccount.com
 
     - id: secrets
