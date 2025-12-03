@@ -101,31 +101,6 @@
     </script>
 
     <script type="text/javascript">
-      // Cache busting: Standard query parameter support
-      // Supports ?v=timestamp, ?_=timestamp, ?nocache=1
-      (function () {
-        var params = new URLSearchParams(window.location.search);
-        var cacheBust = params.get('v') || params.get('_') || params.get('nocache');
-        
-        if (cacheBust) {
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-              registrations.forEach(function(registration) {
-                registration.unregister();
-              });
-            });
-          }
-          
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              return Promise.all(names.map(function(name) {
-                return caches.delete(name);
-              }));
-            });
-          }
-        }
-      })();
-      
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
