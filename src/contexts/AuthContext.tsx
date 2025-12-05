@@ -87,8 +87,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
-        <div className="inline-block w-8 h-8 border-2 border-gray-300 dark:border-gray-700 border-t-gray-900 dark:border-t-gray-200 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
       </div>
     );
   }
