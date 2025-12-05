@@ -38,7 +38,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
   }, [generatedUrl]);
 
   return (
-    <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
       <td className="py-5 px-4">
         <div className="flex flex-col gap-2">
           {variables.length > 0 &&
@@ -50,12 +50,12 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
                 placeholder={v}
                 onChange={handleInputChange(v)}
                 onKeyDown={handleInputKeyDown(v)}
-                className="text-sm text-gray-900 bg-transparent border-b border-gray-300 focus:border-gray-900 focus:outline-none py-1 transition-colors"
+                className="text-sm text-gray-900 dark:text-gray-200 bg-transparent border-b border-gray-300 dark:border-gray-700 focus:border-gray-900 dark:focus:border-gray-500 focus:outline-none py-1 transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
             ))}
           <a
             href={`${publicUrl}${generatedSubpath}`}
-            className="text-sm text-gray-900 hover:text-gray-600 transition-colors font-mono"
+            className="text-sm text-gray-900 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 transition-colors font-mono"
             title={`${publicUrl}${generatedSubpath}`}
           >
             {generatedSubpath}
@@ -65,7 +65,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
       <td className="py-5 px-4">
         <a
           href={generatedUrl}
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors break-all"
+          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors break-all"
           title={generatedUrl}
         >
           {generatedUrl}
@@ -74,7 +74,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
       <td className="py-5 px-4">
         <button
           onClick={handleCopy}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           title="Copy"
           type="button"
         >
