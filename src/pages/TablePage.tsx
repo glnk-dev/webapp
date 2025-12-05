@@ -1,18 +1,26 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import URLGenerator from '../components/URLGenerator';
 import { TablePageProps } from '../types';
 import { getGlnkUsername, getPublicUrl } from '../utils/env';
-import { GLNK_BASE_URL } from '../constants';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { LogoutIcon } from '../components/icons/LogoutIcon';
+import { CloseIcon } from '../components/icons/CloseIcon';
 import { useAuth } from '../contexts/AuthContext';
 
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const glnkUsername = getGlnkUsername();
   const publicUrl = getPublicUrl();
-  const { user, isAuthenticated, logout, login } = useAuth();
+  const { user, isAuthenticated, logout, login, loginError } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [showMismatchMessage, setShowMismatchMessage] = useState(true);
+
+  useEffect(() => {
+    // When loginError becomes 'username_mismatch', show the message again
+    if (loginError === 'username_mismatch') {
+      setShowMismatchMessage(true);
+    }
+  }, [loginError]);
 
   const links = useMemo(
     () =>
@@ -68,31 +76,67 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handleGitHubLogin}
-                  disabled={isSigningIn}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
-                  type="button"
-                >
-                  <GitHubIcon />
-                  <span className="text-sm">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
-                </button>
-                <a
-                  href={GLNK_BASE_URL}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                  title="Join glnk.dev"
-                >
-                  <ExternalLinkIcon />
-                  <span className="text-sm">Join glnk.dev</span>
-                </a>
-              </div>
+              <button
+                onClick={handleGitHubLogin}
+                disabled={isSigningIn}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
+                type="button"
+              >
+                <GitHubIcon />
+                <span className="text-sm">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
+              </button>
             )}
           </div>
         </div>
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+        {loginError === 'username_mismatch' && showMismatchMessage && (
+          <div className="mb-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">
+                  Username Mismatch
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Your GitHub username doesn't match this glnk.dev site.
+                </p>
+                <a
+                  href="https://glnk.dev/register"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <span>Register for your own glnk.dev site</span>
+                  <ExternalLinkIcon className="w-4 h-4" />
+                </a>
+              </div>
+              <button
+                onClick={() => setShowMismatchMessage(false)}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Close"
+                type="button"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          </div>
+        )}
         {links.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">

@@ -4,14 +4,52 @@ import {
   onAuthStateChanged,
   signOut as firebaseSignOut,
   signInWithPopup,
+  GithubAuthProvider,
+  UserCredential,
 } from 'firebase/auth';
 import { auth, githubProvider } from '../lib/firebase';
 import { User } from '../types';
+import { getGlnkUsername } from '../utils/env';
+
+const fetchGitHubUsername = async (accessToken: string): Promise<string | null> => {
+  const response = await fetch('https://api.github.com/user', {
+    headers: {
+      Authorization: `token ${accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
+    },
+  });
+  
+  if (!response.ok) {
+    return null;
+  }
+  
+  const data = await response.json();
+  return data.login || null;
+};
+
+const extractAccessToken = (result: UserCredential): string | null => {
+  const credential = GithubAuthProvider.credentialFromResult(result);
+  return credential?.accessToken || null;
+};
+
+const isUsernameMismatch = (githubUsername: string | null, glnkUsername: string): boolean => {
+  if (!githubUsername) {
+    return false;
+  }
+  return githubUsername.toLowerCase() !== glnkUsername.toLowerCase();
+};
+
+const shouldHandleError = (error: any): boolean => {
+  const isPopupClosed = error.code === 'auth/popup-closed-by-user';
+  const isUsernameMismatch = error.message === 'GitHub username does not match glnk username';
+  return !isPopupClosed && !isUsernameMismatch;
+};
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  loginError: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -45,6 +83,8 @@ const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const glnkUsername = getGlnkUsername();
 
   useEffect(() => {
     if (!auth || typeof auth.onAuthStateChanged !== 'function') {
@@ -54,6 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
       setUser(mapFirebaseUser(firebaseUser));
+      setLoginError(null);
       setIsLoading(false);
     });
 
@@ -64,8 +105,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!auth || typeof signInWithPopup !== 'function') {
       throw new Error('Firebase is not configured');
     }
-    await signInWithPopup(auth, githubProvider);
-  }, []);
+    
+    setLoginError(null);
+    
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      const accessToken = extractAccessToken(result);
+      
+      if (!accessToken) {
+        throw new Error('Failed to get GitHub access token');
+      }
+      
+      const githubUsername = await fetchGitHubUsername(accessToken);
+      
+      if (isUsernameMismatch(githubUsername, glnkUsername)) {
+        if (auth && typeof firebaseSignOut === 'function') {
+          await firebaseSignOut(auth);
+        }
+        setLoginError('username_mismatch');
+        throw new Error('GitHub username does not match glnk username');
+      }
+    } catch (error: any) {
+      if (shouldHandleError(error)) {
+        setLoginError('login_failed');
+        throw error;
+      }
+    }
+  }, [glnkUsername]);
 
   const logout = useCallback(async (): Promise<void> => {
     try {
@@ -81,6 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isAuthenticated: user !== null,
     isLoading,
+    loginError,
     login,
     logout,
   };

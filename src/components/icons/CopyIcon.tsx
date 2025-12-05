@@ -16,4 +16,3 @@ export const CopyIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-
     />
   </svg>
 );
-
