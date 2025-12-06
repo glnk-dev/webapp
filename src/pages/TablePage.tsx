@@ -1,19 +1,23 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import URLGenerator from '../components/URLGenerator';
 import { TablePageProps } from '../types';
-import { getGlnkUsername, getPublicUrl } from '../utils/env';
+import { getGlnkUsername, getPublicUrl, isAuthorizedOnly } from '../utils/env';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { LogoutIcon } from '../components/icons/LogoutIcon';
 import { CloseIcon } from '../components/icons/CloseIcon';
+import { LoginOverlay } from '../components/LoginOverlay';
 import { useAuth } from '../contexts/AuthContext';
 
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const glnkUsername = getGlnkUsername();
   const publicUrl = getPublicUrl();
+  const authorizedOnly = isAuthorizedOnly();
   const { user, isAuthenticated, logout, login, loginError } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
+  
+  const showLoginOverlay = authorizedOnly && !isAuthenticated;
 
   useEffect(() => {
     // When loginError becomes 'username_mismatch', show the message again
@@ -168,6 +172,8 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
           </div>
         )}
       </main>
+      
+      {showLoginOverlay && <LoginOverlay onLogin={login} />}
     </div>
   );
 };
