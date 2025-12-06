@@ -96,11 +96,11 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
 
       <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
         {loginError === 'username_mismatch' && showMismatchMessage && (
-          <div className="mb-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl shadow-sm">
+          <div className="mb-8 p-6 bg-white border border-gray-200 rounded-2xl shadow-lg">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-gray-600"
+                  className="w-5 h-5 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -114,26 +114,27 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">
-                  Username Mismatch
+                <h3 className="text-base font-semibold mb-1">
+                  <span className="text-gray-800">This site belongs to </span>
+                  <span className="text-gray-600">{glnkUsername}</span>
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Your GitHub username doesn't match this glnk.dev site.
+                  Your GitHub account doesn't have access to this glnk.dev site. 
+                  You can register for your own personalized short link domain.
                 </p>
                 <a
                   href="https://glnk.dev/register"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
                 >
-                  <span>Register for your own glnk.dev site</span>
+                  <span>Get your own glnk.dev</span>
                   <ExternalLinkIcon className="w-4 h-4" />
                 </a>
               </div>
               <button
                 onClick={() => setShowMismatchMessage(false)}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Close"
+                className="flex-shrink-0 text-gray-300 hover:text-gray-500 transition-colors"
                 type="button"
               >
                 <CloseIcon />
