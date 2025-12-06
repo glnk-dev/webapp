@@ -1,49 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import {
   User as FirebaseUser,
   onAuthStateChanged,
-  signOut as firebaseSignOut,
+  signOut,
   signInWithPopup,
   GithubAuthProvider,
-  UserCredential,
 } from 'firebase/auth';
 import { auth, githubProvider } from '../lib/firebase';
 import { User } from '../types';
 import { getGlnkUsername } from '../utils/env';
-
-const fetchGitHubUsername = async (accessToken: string): Promise<string | null> => {
-  const response = await fetch('https://api.github.com/user', {
-    headers: {
-      Authorization: `token ${accessToken}`,
-      Accept: 'application/vnd.github.v3+json',
-    },
-  });
-  
-  if (!response.ok) {
-    return null;
-  }
-  
-  const data = await response.json();
-  return data.login || null;
-};
-
-const extractAccessToken = (result: UserCredential): string | null => {
-  const credential = GithubAuthProvider.credentialFromResult(result);
-  return credential?.accessToken || null;
-};
-
-const isUsernameMismatch = (githubUsername: string | null, glnkUsername: string): boolean => {
-  if (!githubUsername) {
-    return false;
-  }
-  return githubUsername.toLowerCase() !== glnkUsername.toLowerCase();
-};
-
-const shouldHandleError = (error: any): boolean => {
-  const isPopupClosed = error.code === 'auth/popup-closed-by-user';
-  const isUsernameMismatch = error.message === 'GitHub username does not match glnk username';
-  return !isPopupClosed && !isUsernameMismatch;
-};
 
 interface AuthContextType {
   user: User | null;
@@ -64,13 +29,8 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
+const toUser = (firebaseUser: FirebaseUser | null): User | null => {
   if (!firebaseUser) return null;
-
   return {
     uid: firebaseUser.uid,
     email: firebaseUser.email,
@@ -80,86 +40,101 @@ const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
   };
 };
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const fetchGitHubLogin = async (accessToken: string): Promise<string | null> => {
+  const response = await fetch('https://api.github.com/user', {
+    headers: {
+      Authorization: `token ${accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
+    },
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.login ?? null;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const glnkUsername = getGlnkUsername();
+  const isValidating = useRef(false);
+  const siteOwner = getGlnkUsername();
 
   useEffect(() => {
-    if (!auth || typeof auth.onAuthStateChanged !== 'function') {
+    if (!auth) {
       setIsLoading(false);
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-      setUser(mapFirebaseUser(firebaseUser));
+    return onAuthStateChanged(auth, (firebaseUser) => {
+      if (isValidating.current) {
+        setIsLoading(false);
+        return;
+      }
+      setUser(toUser(firebaseUser));
       setLoginError(null);
       setIsLoading(false);
     });
-
-    return () => unsubscribe();
   }, []);
 
-  const login = useCallback(async (): Promise<void> => {
-    if (!auth || typeof signInWithPopup !== 'function') {
-      throw new Error('Firebase is not configured');
-    }
-    
+  const login = useCallback(async () => {
+    if (!auth) throw new Error('Firebase not configured');
+
     setLoginError(null);
-    
+    isValidating.current = true;
+
     try {
       const result = await signInWithPopup(auth, githubProvider);
-      const accessToken = extractAccessToken(result);
-      
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const accessToken = credential?.accessToken;
+
       if (!accessToken) {
-        throw new Error('Failed to get GitHub access token');
+        throw new Error('Failed to get access token');
       }
-      
-      const githubUsername = await fetchGitHubUsername(accessToken);
-      
-      if (isUsernameMismatch(githubUsername, glnkUsername)) {
-        if (auth && typeof firebaseSignOut === 'function') {
-          await firebaseSignOut(auth);
-        }
+
+      const githubLogin = await fetchGitHubLogin(accessToken);
+      const isOwner = githubLogin?.toLowerCase() === siteOwner.toLowerCase();
+
+      if (!isOwner) {
+        await signOut(auth);
         setLoginError('username_mismatch');
-        throw new Error('GitHub username does not match glnk username');
+        return;
       }
-    } catch (error: any) {
-      if (shouldHandleError(error)) {
+
+      setUser(toUser(result.user));
+    } catch (error: unknown) {
+      const isPopupClosed = (error as { code?: string }).code === 'auth/popup-closed-by-user';
+      if (!isPopupClosed && !loginError) {
         setLoginError('login_failed');
-        throw error;
       }
+    } finally {
+      isValidating.current = false;
     }
-  }, [glnkUsername]);
+  }, [siteOwner, loginError]);
 
-  const logout = useCallback(async (): Promise<void> => {
-    try {
-      if (auth && typeof firebaseSignOut === 'function') {
-        await firebaseSignOut(auth);
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const logout = useCallback(async () => {
+    if (auth) await signOut(auth);
   }, []);
-
-  const value: AuthContextType = {
-    user,
-    isAuthenticated: user !== null,
-    isLoading,
-    loginError,
-    login,
-    logout,
-  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+        <div className="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
       </div>
     );
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: user !== null,
+        isLoading,
+        loginError,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
-
