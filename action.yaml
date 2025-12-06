@@ -8,6 +8,10 @@ inputs:
   GLNK_USERNAME:
     description: "glnk.dev username"
     required: true
+  GLNK_AUTHORIZED_ONLY:
+    description: "glnk.dev authorized only"
+    required: false
+    default: 0
   GLNK_URLMAP_PATH:
     description: "glnk.dev URL map path"
     required: false
@@ -55,11 +59,13 @@ runs:
       run: |
         mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
         echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
+        echo REACT_APP_GLNK_AUTHORIZED_ONLY=$GLNK_AUTHORIZED_ONLY >> .env
         echo REACT_APP_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
         echo REACT_APP_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+        GLNK_AUTHORIZED_ONLY: ${{ inputs.GLNK_AUTHORIZED_ONLY }}
         FIREBASE_API_KEY: ${{ steps.secrets.outputs.firebase_api_key }}
         FIREBASE_APP_ID: ${{ steps.secrets.outputs.firebase_app_id }}
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
