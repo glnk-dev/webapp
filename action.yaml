@@ -6,22 +6,22 @@ branding:
 
 inputs:
   GLNK_USERNAME:
-    description: "glnk.dev username"
+    description: "Your GitHub username (used as subdomain: username.glnk.dev)"
     required: true
-  GLNK_AUTHORIZED_ONLY:
-    description: "glnk.dev authorized only"
+  GLNK_ACCESS_MODE:
+    description: "Site access control: 'static' = read-only (no login), 'public' = open view + login to edit, 'private' = login required for everything"
     required: false
-    default: 0
+    default: "static"
   GLNK_URLMAP_PATH:
-    description: "glnk.dev URL map path"
+    description: "Path to your YAML file containing URL mappings"
     required: false
     default: glnk.yaml
   GLNK_PUBLIC_URL:
-    description: "glnk.dev public URL"
+    description: "Custom domain URL (leave empty for default username.glnk.dev)"
     required: false
     default: ""
   GLNK_PATH_SEGMENTS:
-    description: "glnk.dev path segment count"
+    description: "Number of path segments to preserve for SPA routing (0 for root domain)"
     required: false
     default: "0"
 
@@ -59,13 +59,13 @@ runs:
       run: |
         mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
         echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
-        echo REACT_APP_GLNK_AUTHORIZED_ONLY=$GLNK_AUTHORIZED_ONLY >> .env
+        echo REACT_APP_GLNK_ACCESS_MODE=$GLNK_ACCESS_MODE >> .env
         echo REACT_APP_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
         echo REACT_APP_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
-        GLNK_AUTHORIZED_ONLY: ${{ inputs.GLNK_AUTHORIZED_ONLY }}
+        GLNK_ACCESS_MODE: ${{ inputs.GLNK_ACCESS_MODE }}
         FIREBASE_API_KEY: ${{ steps.secrets.outputs.firebase_api_key }}
         FIREBASE_APP_ID: ${{ steps.secrets.outputs.firebase_app_id }}
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}

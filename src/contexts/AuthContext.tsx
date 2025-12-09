@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth, githubProvider } from '../lib/firebase';
 import { User } from '../types';
-import { getGlnkUsername } from '../utils/env';
+import { getGlnkUsername, isStatic } from '../utils/env';
 
 interface AuthContextType {
   user: User | null;
@@ -53,14 +53,15 @@ const fetchGitHubLogin = async (accessToken: string): Promise<string | null> => 
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const staticMode = isStatic();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!staticMode);
   const [loginError, setLoginError] = useState<string | null>(null);
   const isValidating = useRef(false);
   const siteOwner = getGlnkUsername();
 
   useEffect(() => {
-    if (!auth) {
+    if (staticMode || !auth) {
       setIsLoading(false);
       return;
     }
@@ -74,10 +75,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoginError(null);
       setIsLoading(false);
     });
-  }, []);
+  }, [staticMode]);
 
   const login = useCallback(async () => {
-    if (!auth) throw new Error('Firebase not configured');
+    if (!auth || !githubProvider) throw new Error('Firebase not configured');
 
     setLoginError(null);
     isValidating.current = true;

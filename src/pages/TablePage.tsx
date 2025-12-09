@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import URLGenerator from '../components/URLGenerator';
 import { TablePageProps } from '../types';
-import { getGlnkUsername, getPublicUrl, isAuthorizedOnly } from '../utils/env';
+import { getGlnkUsername, getPublicUrl, isPrivate, isStatic } from '../utils/env';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { LogoutIcon } from '../components/icons/LogoutIcon';
@@ -23,14 +23,16 @@ interface EditableLink {
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const glnkUsername = getGlnkUsername();
   const publicUrl = getPublicUrl();
-  const authorizedOnly = isAuthorizedOnly();
+  const privateMode = isPrivate();
+  const staticMode = isStatic();
   const { user, isAuthenticated, logout, login, loginError } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
   
-  const showLoginOverlay = authorizedOnly && !isAuthenticated;
+  const showLoginOverlay = privateMode && !isAuthenticated;
+  const canEdit = isAuthenticated && !staticMode;
 
   const links = useMemo(
     () =>
@@ -161,45 +163,47 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
               <span className="font-bold">{glnkUsername}</span>
               <span className="text-gray-500">.glnk.dev</span>
             </a>
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
-                {user.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || user.email || 'User'}
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <span className="text-sm text-gray-600">
-                  {user.displayName || user.email || 'User'}
-                </span>
-                <button
-                  onClick={() => {
-                    if (hasUnsavedChanges) {
-                      if (window.confirm('Your changes have not been saved. Are you sure you want to sign out?')) {
+            {!staticMode && (
+              isAuthenticated && user ? (
+                <div className="flex items-center gap-3">
+                  {user.photoURL && (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || user.email || 'User'}
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
+                  <span className="text-sm text-gray-600">
+                    {user.displayName || user.email || 'User'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      if (hasUnsavedChanges) {
+                        if (window.confirm('Your changes have not been saved. Are you sure you want to sign out?')) {
+                          logout();
+                        }
+                      } else {
                         logout();
                       }
-                    } else {
-                      logout();
-                    }
-                  }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  title="Sign out"
+                    }}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Sign out"
+                    type="button"
+                  >
+                    <LogoutIcon />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleGitHubLogin}
+                  disabled={isSigningIn}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
                   type="button"
                 >
-                  <LogoutIcon />
+                  <GitHubIcon />
+                  <span className="text-sm">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleGitHubLogin}
-                disabled={isSigningIn}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
-                type="button"
-              >
-                <GitHubIcon />
-                <span className="text-sm">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
-              </button>
+              )
             )}
           </div>
         </div>
@@ -265,7 +269,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                     Redirect Link
                   </th>
                   <th className="w-10 sm:w-12 text-right pr-4">
-                    {isAuthenticated && (
+                    {canEdit && (
                       isEditMode ? (
                         <button
                           onClick={handleSaveChanges}
