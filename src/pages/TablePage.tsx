@@ -255,16 +255,16 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         )}
         {(isEditMode ? editableLinks.length > 0 : links.length > 0) || isEditMode ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-28 sm:w-36 text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Subpath
                   </th>
                   <th className="text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Redirect Link
                   </th>
-                  <th className="w-12 text-right pr-4">
+                  <th className="w-10 sm:w-12 text-right pr-4">
                     {isAuthenticated && (
                       isEditMode ? (
                         <button
@@ -304,7 +304,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                             handleUpdateLink(link.id, 'subpath', e.target.value)
                           }
                           placeholder="/path"
-                          className="w-full text-sm text-gray-900 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:border-gray-400 focus:outline-none transition-colors font-mono"
+                          className="w-full text-sm text-gray-900 bg-white border border-gray-200 rounded-lg px-2 py-2 focus:border-gray-400 focus:outline-none transition-colors font-mono"
                         />
                       </td>
                       <td className="py-4 px-4">
@@ -315,10 +315,10 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                             handleUpdateLink(link.id, 'redirectLink', e.target.value)
                           }
                           placeholder="https://example.com"
-                          className="w-full text-sm text-gray-600 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:border-gray-400 focus:outline-none transition-colors"
+                          className="w-full text-sm text-gray-600 bg-white border border-gray-200 rounded-lg px-2 py-2 focus:border-gray-400 focus:outline-none transition-colors"
                         />
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 pr-4">
                         <button
                           onClick={() => handleDeleteLink(link.id)}
                           className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

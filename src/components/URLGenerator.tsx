@@ -65,13 +65,13 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
       <td className="py-5 px-4">
         <a
           href={generatedUrl}
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors break-all"
+          className="text-sm text-gray-600 hover:text-gray-900 transition-colors block truncate"
           title={generatedUrl}
         >
           {generatedUrl}
         </a>
       </td>
-      <td className="py-5 px-4">
+      <td className="py-5 pr-4">
         <button
           onClick={handleCopy}
           className="text-gray-400 hover:text-gray-600 transition-colors"
