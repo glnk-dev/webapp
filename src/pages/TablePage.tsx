@@ -32,12 +32,6 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   
   const showLoginOverlay = authorizedOnly && !isAuthenticated;
 
-  useEffect(() => {
-    if (loginError === 'username_mismatch') {
-      setShowMismatchMessage(true);
-    }
-  }, [loginError]);
-
   const links = useMemo(
     () =>
       Object.entries(redirectMap).map(([key, value]) => ({
@@ -46,6 +40,47 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       })),
     [redirectMap]
   );
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!isEditMode) return false;
+    if (editableLinks.length !== links.length) return true;
+    return editableLinks.some((editLink, index) => {
+      const originalLink = links[index];
+      if (!originalLink) return true;
+      return editLink.subpath !== originalLink.subpath || 
+             editLink.redirectLink !== originalLink.redirectLink;
+    });
+  }, [isEditMode, editableLinks, links]);
+
+  useEffect(() => {
+    if (loginError === 'username_mismatch') {
+      setShowMismatchMessage(true);
+    }
+  }, [loginError]);
+
+  useEffect(() => {
+    if (!isAuthenticated && isEditMode) {
+      setIsEditMode(false);
+      setEditableLinks(
+        Object.entries(redirectMap).map(([key, value], index) => ({
+          id: `link-${index}`,
+          subpath: key,
+          redirectLink: value,
+        }))
+      );
+    }
+  }, [isAuthenticated, isEditMode, redirectMap]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     setEditableLinks(
@@ -72,8 +107,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
     setIsEditMode(true);
   }, []);
 
-  const handleExitEditMode = useCallback(() => {
-    setIsEditMode(false);
+  const resetEditableLinks = useCallback(() => {
     setEditableLinks(
       Object.entries(redirectMap).map(([key, value], index) => ({
         id: `link-${index}`,
@@ -82,6 +116,11 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       }))
     );
   }, [redirectMap]);
+
+  const handleExitEditMode = useCallback(() => {
+    setIsEditMode(false);
+    resetEditableLinks();
+  }, [resetEditableLinks]);
 
   const handleAddLink = useCallback(() => {
     const newId = `new-${Date.now()}`;
@@ -135,7 +174,15 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                   {user.displayName || user.email || 'User'}
                 </span>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    if (hasUnsavedChanges) {
+                      if (window.confirm('Your changes have not been saved. Are you sure you want to sign out?')) {
+                        logout();
+                      }
+                    } else {
+                      logout();
+                    }
+                  }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   title="Sign out"
                   type="button"
@@ -305,7 +352,15 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                   <span>Add new link</span>
                 </button>
                 <button
-                  onClick={handleExitEditMode}
+                  onClick={() => {
+                    if (hasUnsavedChanges) {
+                      if (window.confirm('Are you sure you want to discard your changes?')) {
+                        handleExitEditMode();
+                      }
+                    } else {
+                      handleExitEditMode();
+                    }
+                  }}
                   className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
                   type="button"
                 >
