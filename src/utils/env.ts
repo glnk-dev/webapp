@@ -6,11 +6,11 @@ export const getGlnkUsername = (): string => {
   return process.env.REACT_APP_GLNK_USERNAME || 'defaultUsername';
 };
 
-export type AccessMode = 'static' | 'public' | 'private';
+export type AccessMode = 'static' | 'public' | 'private' | 'homepage';
 
 export const getAccessMode = (): AccessMode => {
   const mode = process.env.REACT_APP_GLNK_ACCESS_MODE;
-  if (mode === 'static' || mode === 'private') {
+  if (mode === 'static' || mode === 'private' || mode === 'homepage') {
     return mode;
   }
   return 'public';
@@ -19,3 +19,4 @@ export const getAccessMode = (): AccessMode => {
 export const isStatic = (): boolean => getAccessMode() === 'static';
 export const isPublic = (): boolean => getAccessMode() === 'public';
 export const isPrivate = (): boolean => getAccessMode() === 'private';
+export const isHomepage = (): boolean => getAccessMode() === 'homepage';

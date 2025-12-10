@@ -8,13 +8,14 @@ import {
 } from 'firebase/auth';
 import { auth, githubProvider } from '../lib/firebase';
 import { User } from '../types';
-import { getGlnkUsername, isStatic } from '../utils/env';
+import { getGlnkUsername, isStatic, isHomepage } from '../utils/env';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   loginError: string | null;
+  githubLogin: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -52,11 +53,15 @@ const fetchGitHubLogin = async (accessToken: string): Promise<string | null> => 
   return data.login ?? null;
 };
 
+const GITHUB_LOGIN_KEY = 'glnk_github_login';
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const staticMode = isStatic();
+  const homepageMode = isHomepage();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(!staticMode);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [githubLogin, setGithubLogin] = useState<string | null>(() => localStorage.getItem(GITHUB_LOGIN_KEY));
   const isValidating = useRef(false);
   const siteOwner = getGlnkUsername();
 
@@ -72,6 +77,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
       setUser(toUser(firebaseUser));
+      if (!firebaseUser) {
+        localStorage.removeItem(GITHUB_LOGIN_KEY);
+        setGithubLogin(null);
+      }
       setLoginError(null);
       setIsLoading(false);
     });
@@ -92,16 +101,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Failed to get access token');
       }
 
-      const githubLogin = await fetchGitHubLogin(accessToken);
-      const isOwner = githubLogin?.toLowerCase() === siteOwner.toLowerCase();
+      const ghLogin = await fetchGitHubLogin(accessToken);
 
-      if (!isOwner) {
-        await signOut(auth);
-        setLoginError('username_mismatch');
-        return;
+      if (homepageMode) {
+        if (ghLogin) {
+          localStorage.setItem(GITHUB_LOGIN_KEY, ghLogin);
+        }
+        setGithubLogin(ghLogin);
+        setUser(toUser(result.user));
+      } else {
+        const isOwner = ghLogin?.toLowerCase() === siteOwner.toLowerCase();
+        if (!isOwner) {
+          await signOut(auth);
+          setLoginError('username_mismatch');
+          return;
+        }
+        setUser(toUser(result.user));
       }
-
-      setUser(toUser(result.user));
     } catch (error: unknown) {
       const isPopupClosed = (error as { code?: string }).code === 'auth/popup-closed-by-user';
       if (!isPopupClosed && !loginError) {
@@ -110,10 +126,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } finally {
       isValidating.current = false;
     }
-  }, [siteOwner, loginError]);
+  }, [siteOwner, loginError, homepageMode]);
 
   const logout = useCallback(async () => {
     if (auth) await signOut(auth);
+    localStorage.removeItem(GITHUB_LOGIN_KEY);
+    setGithubLogin(null);
   }, []);
 
   if (isLoading) {
@@ -131,6 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthenticated: user !== null,
         isLoading,
         loginError,
+        githubLogin,
         login,
         logout,
       }}
