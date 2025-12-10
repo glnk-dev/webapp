@@ -6,10 +6,11 @@ branding:
 
 inputs:
   GLNK_USERNAME:
-    description: "Your GitHub username (used as subdomain: username.glnk.dev)"
-    required: true
+    description: "Your GitHub username (used as subdomain: username.glnk.dev). Not required for homepage mode."
+    required: false
+    default: ""
   GLNK_ACCESS_MODE:
-    description: "Site access control: 'static' = read-only (no login), 'public' = open view + login to edit, 'private' = login required for everything"
+    description: "Site mode: 'static' = read-only, 'public' = login to edit, 'private' = login required, 'homepage' = glnk.dev signup page"
     required: false
     default: "static"
   GLNK_URLMAP_PATH:
@@ -28,12 +29,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         repository: glnk-dev/webapp
 
-    - name: Checkout
-      uses: actions/checkout@v4
+    - name: Checkout urlmap
+      if: inputs.GLNK_ACCESS_MODE != 'homepage'
+      uses: actions/checkout@v6
       with:
         path: main
         sparse-checkout: |
@@ -56,21 +58,28 @@ runs:
           firebase_api_key:playground-365100/glnk-dev-firebase-api-key
           firebase_app_id:playground-365100/glnk-dev-firebase-app-id
 
-    - name: Replace template variables
+    - name: Setup user site
+      if: inputs.GLNK_ACCESS_MODE != 'homepage'
       shell: bash
       run: |
         mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
+        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
+      env:
+        GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+        GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
+
+    - name: Create .env file
+      shell: bash
+      run: |
         echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
         echo REACT_APP_GLNK_ACCESS_MODE=$GLNK_ACCESS_MODE >> .env
         echo REACT_APP_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
         echo REACT_APP_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
-        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
         GLNK_ACCESS_MODE: ${{ inputs.GLNK_ACCESS_MODE }}
         FIREBASE_API_KEY: ${{ steps.secrets.outputs.firebase_api_key }}
         FIREBASE_APP_ID: ${{ steps.secrets.outputs.firebase_app_id }}
-        GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
 
     - name: Install Node.js
       uses: actions/setup-node@v4
