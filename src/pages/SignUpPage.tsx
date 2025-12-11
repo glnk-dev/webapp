@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import { LogoutIcon } from '../components/icons/LogoutIcon';
+import { PlusIcon } from '../components/icons/PlusIcon';
+import { TrashIcon } from '../components/icons/TrashIcon';
 import { useAuth } from '../contexts/AuthContext';
 import { requestSignup } from '../lib/firebase';
+
+interface InitialLink {
+  subpath: string;
+  redirectLink: string;
+}
+
+const getDefaultLinks = (username: string): InitialLink[] => [
+  { subpath: 'github', redirectLink: `https://github.com/${username}` },
+  { subpath: 'blog', redirectLink: `https://${username}.github.io` },
+];
 
 const SignUpPage: React.FC = () => {
   const { githubLogin, login, logout, isAuthenticated, user } = useAuth();
@@ -11,9 +23,22 @@ const SignUpPage: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [links, setLinks] = useState<InitialLink[]>([]);
+  const [initializedFor, setInitializedFor] = useState<string | null>(null);
 
   const username = githubLogin || '';
   const previewUrl = username ? `${username.toLowerCase()}.glnk.dev` : 'username.glnk.dev';
+
+  // Initialize/reset links when username changes
+  React.useEffect(() => {
+    if (username && username !== initializedFor) {
+      setLinks(getDefaultLinks(username));
+      setInitializedFor(username);
+    } else if (!username && initializedFor) {
+      setLinks([]);
+      setInitializedFor(null);
+    }
+  }, [username, initializedFor]);
 
   const handleGitHubLogin = async () => {
     setIsLoggingIn(true);
@@ -25,15 +50,48 @@ const SignUpPage: React.FC = () => {
     }
   };
 
+  const handleAddLink = useCallback(() => {
+    setLinks((prev) => [...prev, { subpath: '', redirectLink: '' }]);
+  }, []);
+
+  const handleDeleteLink = useCallback((index: number) => {
+    setLinks((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleUpdateLink = useCallback((index: number, field: 'subpath' | 'redirectLink', value: string) => {
+    setLinks((prev) => prev.map((link, i) => (i === index ? { ...link, [field]: value } : link)));
+  }, []);
+
+  const getValidLinks = (linkList: InitialLink[]): InitialLink[] => {
+    return linkList.filter((l) => l.subpath.trim() && l.redirectLink.trim());
+  };
+
+  const hasDuplicates = (linkList: InitialLink[]): boolean => {
+    const subpaths = linkList.map((l) => l.subpath.trim()).filter(Boolean);
+    return new Set(subpaths).size !== subpaths.length;
+  };
+
+  const linksToYaml = (linkList: InitialLink[]): string => {
+    const validLinks = getValidLinks(linkList);
+    if (validLinks.length === 0) return '';
+    return validLinks.map((l) => `"/${l.subpath.trim()}": "${l.redirectLink.trim()}"`).join('\n');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !requestSignup) return;
+
+    if (hasDuplicates(links)) {
+      setError('Duplicate paths are not allowed');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await requestSignup({ username });
+      const initialLinks = linksToYaml(links);
+      await requestSignup({ username, initial_links: initialLinks });
       setSubmitted(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to submit request';
@@ -42,6 +100,8 @@ const SignUpPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  const validLinkCount = links.filter((l) => l.subpath.trim() && l.redirectLink.trim()).length;
 
   if (submitted) {
     return (
@@ -111,7 +171,7 @@ const SignUpPage: React.FC = () => {
       </nav>
 
       <div className="flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-xl">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-semibold text-gray-900 mb-2">Create your glnk.dev</h1>
@@ -143,18 +203,72 @@ const SignUpPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="mb-6 space-y-3">
-                  <h3 className="text-sm font-medium text-gray-900">What you'll get:</h3>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    {['Your own domain', 'Unlimited short links', 'Free GitHub Pages hosting', 'Full control'].map((item) => (
-                      <li key={item} className="flex items-start gap-2">
-                        <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-gray-900">Initial Links</h3>
+                    <span className="text-xs text-gray-400">
+                      {validLinkCount} link{validLinkCount !== 1 ? 's' : ''} configured
+                    </span>
+                  </div>
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="w-28 text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Path</th>
+                          <th className="text-left py-2 px-3 text-xs font-medium text-gray-500 uppercase">Redirect URL</th>
+                          <th className="w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {links.map((link, index) => {
+                          const isDuplicate = links.some((l, i) => i !== index && l.subpath.trim() === link.subpath.trim() && link.subpath.trim());
+                          return (
+                            <tr key={index} className={index !== links.length - 1 ? 'border-b border-gray-100' : ''}>
+                              <td className="py-2 px-3">
+                                <div className="flex items-center">
+                                  <span className="text-gray-400 text-sm mr-1">/</span>
+                                  <input
+                                    type="text"
+                                    value={link.subpath}
+                                    onChange={(e) => handleUpdateLink(index, 'subpath', e.target.value)}
+                                    placeholder="path"
+                                    className={`w-full text-sm bg-transparent focus:outline-none font-mono ${isDuplicate ? 'text-red-500' : ''}`}
+                                  />
+                                </div>
+                              </td>
+                              <td className="py-2 px-3">
+                                <input
+                                  type="text"
+                                  value={link.redirectLink}
+                                  onChange={(e) => handleUpdateLink(index, 'redirectLink', e.target.value)}
+                                  placeholder="https://..."
+                                  className="w-full text-sm bg-transparent focus:outline-none text-gray-600"
+                                />
+                              </td>
+                              <td className="py-2 pr-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteLink(index)}
+                                  className="text-gray-300 hover:text-red-500 transition-colors"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <button
+                      type="button"
+                      onClick={handleAddLink}
+                      className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors border-t border-gray-100"
+                    >
+                      <PlusIcon className="w-4 h-4" />
+                      <span>Add link</span>
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-gray-400">You can always add or edit links after your site is created.</p>
                 </div>
 
                 {error && (
@@ -189,4 +303,3 @@ const SignUpPage: React.FC = () => {
 };
 
 export default SignUpPage;
-

@@ -17,6 +17,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:homepage": "env-cmd -f .env.homepage react-scripts start",
+    "start:private": "env-cmd -f .env.private react-scripts start",
+    "start:public": "env-cmd -f .env.public react-scripts start",
+    "start:static": "env-cmd -f .env.static react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -40,6 +44,7 @@
     ]
   },
   "devDependencies": {
+    "env-cmd": "^10.1.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.3.0",
     "@types/react": "^18.3.3",

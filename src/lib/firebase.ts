@@ -31,7 +31,7 @@ if (!isStatic()) {
 }
 
 export const requestSignup = functions
-  ? httpsCallable<{ username: string }, { success: boolean; issue_url: string }>(functions, 'request_signup')
+  ? httpsCallable<{ username: string; initial_links?: string }, { success: boolean; issue_url: string }>(functions, 'request_signup')
   : null;
 
 export { auth, githubProvider };
