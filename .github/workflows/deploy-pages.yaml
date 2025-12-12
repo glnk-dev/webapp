@@ -18,6 +18,6 @@ jobs:
       - name: Build and Deploy glnk-dev Webapp to GitHub Pages
         uses: glnk-dev/webapp@main
         with:
-          GLNK_USERNAME: foobar
+          GLNK_USERNAME: geek
           GLNK_PUBLIC_URL: /webapp
           GLNK_PATH_SEGMENTS: 1
