@@ -1,7 +1,7 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GithubAuthProvider } from 'firebase/auth';
 import { getFunctions, httpsCallable, Functions } from 'firebase/functions';
-import { isStatic, isHomepage } from '../utils/env';
+import { isStatic } from '../utils/env';
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
@@ -22,9 +22,7 @@ if (!isStatic()) {
     githubProvider = new GithubAuthProvider();
     githubProvider.addScope('read:user');
     githubProvider.addScope('user:email');
-    if (isHomepage()) {
-      functions = getFunctions(app, 'us-central1');
-    }
+    functions = getFunctions(app, 'us-central1');
   } catch (error) {
     console.error('Firebase initialization error:', error);
   }
@@ -32,6 +30,15 @@ if (!isStatic()) {
 
 export const requestSignup = functions
   ? httpsCallable<{ username: string; initial_links?: string }, { success: boolean; issue_url: string }>(functions, 'request_signup')
+  : null;
+
+export interface LinkData {
+  subpath: string;
+  redirectLink: string;
+}
+
+export const updateLinks = functions
+  ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'update_links')
   : null;
 
 export { auth, githubProvider };

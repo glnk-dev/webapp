@@ -39,7 +39,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-      <td className="py-5 px-4">
+      <td className="py-5 px-4 overflow-hidden">
         <div className="flex flex-col gap-2">
           {variables.length > 0 &&
             variables.map((v) => (
@@ -50,12 +50,12 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
                 placeholder={v}
                 onChange={handleInputChange(v)}
                 onKeyDown={handleInputKeyDown(v)}
-                className="text-sm text-gray-900 bg-transparent border-b border-gray-300 focus:border-gray-900 focus:outline-none py-1 transition-colors"
+                className="text-sm text-gray-900 bg-transparent border-b border-gray-300 focus:border-gray-900 focus:outline-none py-1 transition-colors w-full"
               />
             ))}
           <a
             href={`${publicUrl}${generatedSubpath}`}
-            className="text-sm text-gray-900 hover:text-gray-600 transition-colors font-mono"
+            className="text-sm text-gray-900 hover:text-gray-600 transition-colors font-mono truncate block"
             title={`${publicUrl}${generatedSubpath}`}
           >
             {generatedSubpath}
