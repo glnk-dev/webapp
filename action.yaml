@@ -13,10 +13,6 @@ inputs:
     description: "Site mode: 'static' = read-only, 'public' = login to edit, 'private' = login required, 'homepage' = glnk.dev signup page"
     required: false
     default: "static"
-  GLNK_URLMAP_PATH:
-    description: "Path to your YAML file containing URL mappings"
-    required: false
-    default: glnk.yaml
   GLNK_PUBLIC_URL:
     description: "Custom domain URL (leave empty for default username.glnk.dev)"
     required: false
@@ -33,13 +29,13 @@ runs:
       with:
         repository: glnk-dev/webapp
 
-    - name: Checkout urlmap
+    - uses: actions/checkout@v6
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
-      uses: actions/checkout@v6
       with:
-        path: main
+        repository: glnk-dev/community
+        path: community
         sparse-checkout: |
-          ${{ inputs.GLNK_URLMAP_PATH }}
+          users/glnk-${{ inputs.GLNK_USERNAME }}.yaml
 
     - id: auth
       name: Authenticate to Google Cloud
@@ -62,7 +58,7 @@ runs:
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
       shell: bash
       run: |
-        mv main/${{ inputs.GLNK_URLMAP_PATH }} public/glnk.yaml
+        mv community/users/glnk-$GLNK_USERNAME.yaml public/glnk.yaml
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}

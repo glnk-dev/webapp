@@ -18,7 +18,7 @@ jobs:
       - name: Build and Deploy glnk-dev Webapp to GitHub Pages
         uses: glnk-dev/webapp@main
         with:
-          GLNK_USERNAME: geek
-          GLNK_URLMAP_PATH: public/glnk.yaml
+          GLNK_USERNAME: lucetre
           GLNK_PUBLIC_URL: /webapp
-          GLNK_PATH_SEGMENTS: 1
+          GLNK_PATH_SEGMENTS: 0
+          GLNK_ACCESS_MODE: public
