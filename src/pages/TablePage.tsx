@@ -36,9 +36,11 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
+  const [editLockedUntil, setEditLockedUntil] = useState<number | null>(null);
 
   const showLoginOverlay = privateMode && !isAuthenticated;
-  const canEdit = isAuthenticated && !staticMode;
+  const isEditLocked = editLockedUntil !== null && Date.now() < editLockedUntil;
+  const canEdit = isAuthenticated && !staticMode && !isEditLocked;
 
   const links = useMemo(
     () => Object.entries(redirectMap).map(([key, value]) => ({ subpath: key, redirectLink: value })),
@@ -117,6 +119,11 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, []);
 
   const handleSaveChanges = useCallback(async () => {
+    if (!hasUnsavedChanges) {
+      setIsEditMode(false);
+      return;
+    }
+
     if (!updateLinks) {
       setSaveError('Edit functionality is not available');
       return;
@@ -145,13 +152,13 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
       setIsEditMode(false);
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 10000);
+      setEditLockedUntil(Date.now() + 60000);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Failed to save changes');
     } finally {
       setIsSaving(false);
     }
-  }, [editableLinks, glnkUsername, queryClient]);
+  }, [editableLinks, glnkUsername, queryClient, hasUnsavedChanges]);
 
   return (
     <div className="min-h-screen bg-white">
