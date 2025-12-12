@@ -8,6 +8,7 @@ import { EditControls } from '../components/EditControls';
 import { LoginOverlay } from '../components/LoginOverlay';
 import { PencilIcon } from '../components/icons/PencilIcon';
 import { CheckIcon } from '../components/icons/CheckIcon';
+import { RefreshIcon } from '../components/icons/RefreshIcon';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
 import { TablePageProps } from '../types';
@@ -31,6 +32,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
@@ -142,6 +144,8 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       });
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
       setIsEditMode(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 10000);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Failed to save changes');
     } finally {
@@ -166,6 +170,37 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
         {loginError === 'username_mismatch' && showMismatchMessage && (
           <MismatchAlert username={glnkUsername} onClose={() => setShowMismatchMessage(false)} />
+        )}
+
+        {saveSuccess && (
+          <div className="mb-8 p-6 bg-white border border-gray-200 rounded-2xl shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckIcon className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Changes saved!</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Your links have been updated. It may take a few minutes for changes to appear.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
+                  type="button"
+                >
+                  <RefreshIcon className="w-4 h-4" />
+                  <span>Refresh page</span>
+                </button>
+              </div>
+              <button
+                onClick={() => setSaveSuccess(false)}
+                className="flex-shrink-0 text-gray-300 hover:text-gray-500 transition-colors"
+                type="button"
+              >
+                <span className="text-xl leading-none">×</span>
+              </button>
+            </div>
+          </div>
         )}
 
         {(isEditMode ? editableLinks.length > 0 : links.length > 0) || isEditMode ? (
