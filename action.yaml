@@ -29,15 +29,6 @@ runs:
       with:
         repository: glnk-dev/webapp
 
-    - name: Checkout urlmap
-      if: inputs.GLNK_ACCESS_MODE != 'homepage'
-      uses: actions/checkout@v6
-      with:
-        repository: glnk-dev/community
-        path: community
-        sparse-checkout: |
-          users/glnk-${{ inputs.GLNK_USERNAME }}.yaml
-
     - id: auth
       name: Authenticate to Google Cloud
       if: inputs.GLNK_ACCESS_MODE != 'static'
@@ -48,12 +39,32 @@ runs:
 
     - id: secrets
       name: Get secrets from Google Secret Manager
-      if: inputs.GLNK_ACCESS_MODE != 'static'
       uses: google-github-actions/get-secretmanager-secrets@v3
       with:
         secrets: |-
+          gh_app_id:playground-365100/gh-app-glnk-manager-id
+          gh_app_private_key:playground-365100/gh-app-glnk-manager-private-key
           firebase_api_key:playground-365100/glnk-dev-firebase-api-key
           firebase_app_id:playground-365100/glnk-dev-firebase-app-id
+
+    - uses: actions/create-github-app-token@v2
+      id: app-token
+      with:
+        app-id: ${{ steps.secrets.outputs.gh_app_id }}
+        private-key: ${{ steps.secrets.outputs.gh_app_private_key }}
+        owner: ${{ github.repository_owner }}
+        repositories: community
+
+    - name: Checkout urlmap
+      if: inputs.GLNK_ACCESS_MODE != 'homepage'
+      uses: actions/checkout@v6
+      with:
+        repository: glnk-dev/community
+        token: ${{ steps.app-token.outputs.token }}
+        path: community
+        sparse-checkout: |
+          users/glnk-${{ inputs.GLNK_USERNAME }}.yaml
+
 
     - name: Setup user site
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
