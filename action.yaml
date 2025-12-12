@@ -31,7 +31,6 @@ runs:
 
     - id: auth
       name: Authenticate to Google Cloud
-      if: inputs.GLNK_ACCESS_MODE != 'static'
       uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/1042177442694/locations/global/workloadIdentityPools/github/providers/glnk-dev
@@ -64,7 +63,6 @@ runs:
         path: community
         sparse-checkout: |
           users/glnk-${{ inputs.GLNK_USERNAME }}.yaml
-
 
     - name: Setup user site
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
