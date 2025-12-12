@@ -47,6 +47,7 @@ runs:
           firebase_app_id:playground-365100/glnk-dev-firebase-app-id
 
     - uses: actions/create-github-app-token@v2
+      if: inputs.GLNK_ACCESS_MODE != 'homepage'
       id: app-token
       with:
         app-id: ${{ steps.secrets.outputs.gh_app_id }}
@@ -68,7 +69,7 @@ runs:
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
       shell: bash
       run: |
-        mv community/users/glnk-$GLNK_USERNAME.yaml public/glnk.yaml
+        mv community/users/glnk-$GLNK_USERNAME.yaml public/glnk.yaml || true
         find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
