@@ -22,6 +22,7 @@ const SignUpPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [links, setLinks] = useState<InitialLink[]>([]);
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
@@ -62,26 +63,25 @@ const SignUpPage: React.FC = () => {
     setLinks((prev) => prev.map((link, i) => (i === index ? { ...link, [field]: value } : link)));
   }, []);
 
-  const getValidLinks = (linkList: InitialLink[]): InitialLink[] => {
-    return linkList.filter((l) => l.subpath.trim() && l.redirectLink.trim());
+  const getValidLinks = (): InitialLink[] => {
+    return links
+      .filter((l) => l.subpath.trim() && l.redirectLink.trim())
+      .map((l) => ({
+        subpath: l.subpath.trim().startsWith('/') ? l.subpath.trim() : `/${l.subpath.trim()}`,
+        redirectLink: l.redirectLink.trim(),
+      }));
   };
 
-  const hasDuplicates = (linkList: InitialLink[]): boolean => {
-    const subpaths = linkList.map((l) => l.subpath.trim()).filter(Boolean);
+  const hasDuplicates = (): boolean => {
+    const subpaths = links.map((l) => l.subpath.trim()).filter(Boolean);
     return new Set(subpaths).size !== subpaths.length;
-  };
-
-  const linksToYaml = (linkList: InitialLink[]): string => {
-    const validLinks = getValidLinks(linkList);
-    if (validLinks.length === 0) return '';
-    return validLinks.map((l) => `"/${l.subpath.trim()}": "${l.redirectLink.trim()}"`).join('\n');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !requestSignup) return;
 
-    if (hasDuplicates(links)) {
+    if (hasDuplicates()) {
       setError('Duplicate paths are not allowed');
       return;
     }
@@ -90,18 +90,56 @@ const SignUpPage: React.FC = () => {
     setError(null);
 
     try {
-      const initialLinks = linksToYaml(links);
-      await requestSignup({ username, initial_links: initialLinks });
+      await requestSignup({ username, links: getValidLinks() });
       setSubmitted(true);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to submit request';
-      setError(message);
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      const isAlreadyExists = error.code?.includes('already-exists') || error.message?.toLowerCase().includes('already exists');
+      if (isAlreadyExists) {
+        setAlreadyExists(true);
+      } else {
+        setError(error.message || 'Failed to submit request');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const validLinkCount = links.filter((l) => l.subpath.trim() && l.redirectLink.trim()).length;
+
+  if (alreadyExists) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Already Submitted</h1>
+            <p className="text-gray-600 mb-6">
+              Your request for <span className="font-medium text-gray-900">{username}.glnk.dev</span> has already been submitted.
+            </p>
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+              <p className="text-sm text-gray-600">
+                Your site is being provisioned or awaiting admin approval. This usually takes a few minutes.
+              </p>
+            </div>
+            <a
+              href={`https://${previewUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
+            >
+              <span>Check your site</span>
+              <ExternalLinkIcon className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -113,9 +151,9 @@ const SignUpPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Request Submitted!</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Site Created!</h1>
             <p className="text-gray-600 mb-6">
-              Your registration request for <span className="font-medium text-gray-900">{username}.glnk.dev</span> has been submitted.
+              Your site <span className="font-medium text-gray-900">{username}.glnk.dev</span> has been created.
             </p>
             <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
               <h3 className="text-sm font-medium text-gray-900 mb-2">What happens next?</h3>
@@ -130,7 +168,7 @@ const SignUpPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400">3.</span>
-                  <span>You'll receive an email when your site is ready</span>
+                  <span>Your site will be live in a few minutes</span>
                 </li>
               </ul>
             </div>

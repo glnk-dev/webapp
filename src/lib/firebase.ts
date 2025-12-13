@@ -28,14 +28,14 @@ if (!isStatic()) {
   }
 }
 
-export const requestSignup = functions
-  ? httpsCallable<{ username: string; initial_links?: string }, { success: boolean; issue_url: string }>(functions, 'request_signup')
-  : null;
-
 export interface LinkData {
   subpath: string;
   redirectLink: string;
 }
+
+export const requestSignup = functions
+  ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'request_signup')
+  : null;
 
 export const updateLinks = functions
   ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'update_links')
