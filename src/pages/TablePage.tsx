@@ -8,7 +8,6 @@ import { EditControls } from '../components/EditControls';
 import { LoginOverlay } from '../components/LoginOverlay';
 import { PencilIcon } from '../components/icons/PencilIcon';
 import { CheckIcon } from '../components/icons/CheckIcon';
-import { RefreshIcon } from '../components/icons/RefreshIcon';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
 import { TablePageProps } from '../types';
@@ -190,14 +189,14 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                 <p className="text-sm text-gray-600 mb-4">
                   Your links have been updated. It may take a few minutes for changes to appear.
                 </p>
-                <button
-                  onClick={() => window.location.reload()}
+                <a
+                  href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
-                  type="button"
                 >
-                  <RefreshIcon className="w-4 h-4" />
-                  <span>Refresh page</span>
-                </button>
+                  Check deploy status
+                </a>
               </div>
               <button
                 onClick={() => setSaveSuccess(false)}
@@ -210,7 +209,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
           </div>
         )}
 
-        {(isEditMode ? editableLinks.length > 0 : links.length > 0) || isEditMode ? (
+        {isEditMode || links.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full table-fixed">
               <thead>
