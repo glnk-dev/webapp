@@ -32,6 +32,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [deployCountdown, setDeployCountdown] = useState(0);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
@@ -85,6 +86,21 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   useEffect(() => {
     setEditableLinks(toEditableLinks());
   }, [toEditableLinks]);
+
+  useEffect(() => {
+    if (!saveSuccess) return;
+    setDeployCountdown(180);
+    const interval = setInterval(() => {
+      setDeployCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [saveSuccess]);
 
   const handleLogin = useCallback(async () => {
     setIsSigningIn(true);
@@ -189,14 +205,23 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                 <p className="text-sm text-gray-600 mb-4">
                   Your links have been updated. It may take a few minutes for changes to appear.
                 </p>
-                <a
-                  href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
-                >
-                  Check deploy status
-                </a>
+                {deployCountdown > 0 ? (
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-500 bg-gray-100 rounded-xl">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Estimated {Math.floor(deployCountdown / 60)}:{String(deployCountdown % 60).padStart(2, '0')}</span>
+                  </div>
+                ) : (
+                  <a
+                    href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
+                  >
+                    Check deploy status
+                  </a>
+                )}
               </div>
               <button
                 onClick={() => setSaveSuccess(false)}
