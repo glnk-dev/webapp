@@ -94,13 +94,14 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
       setDeployCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [saveSuccess]);
+  }, [saveSuccess, queryClient]);
 
   const handleLogin = useCallback(async () => {
     setIsSigningIn(true);
@@ -206,12 +207,18 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                   Your links have been updated. It may take a few minutes for changes to appear.
                 </p>
                 {deployCountdown > 0 ? (
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-500 bg-gray-100 rounded-xl">
+                  <a
+                    href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-400 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
+                    title="Check deploy status"
+                  >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Estimated {Math.floor(deployCountdown / 60)}:{String(deployCountdown % 60).padStart(2, '0')}</span>
-                  </div>
+                  </a>
                 ) : (
                   <a
                     href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
