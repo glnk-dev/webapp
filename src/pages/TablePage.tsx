@@ -89,7 +89,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
 
   useEffect(() => {
     if (!saveSuccess) return;
-    setDeployCountdown(180);
+    setDeployCountdown(300);
     const interval = setInterval(() => {
       setDeployCountdown((prev) => {
         if (prev <= 1) {
