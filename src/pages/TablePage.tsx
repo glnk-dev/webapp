@@ -8,6 +8,7 @@ import { EditControls } from '../components/EditControls';
 import { LoginOverlay } from '../components/LoginOverlay';
 import { PencilIcon } from '../components/icons/PencilIcon';
 import { CheckIcon } from '../components/icons/CheckIcon';
+import { CloseIcon } from '../components/icons/CloseIcon';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
 import { TablePageProps } from '../types';
@@ -118,9 +119,14 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, []);
 
   const handleExitEditMode = useCallback(() => {
+    if (hasUnsavedChanges) {
+      if (!window.confirm('Are you sure you want to discard your changes?')) {
+        return;
+      }
+    }
     setIsEditMode(false);
     setEditableLinks(toEditableLinks());
-  }, [toEditableLinks]);
+  }, [toEditableLinks, hasUnsavedChanges]);
 
   const handleAddLink = useCallback(() => {
     setEditableLinks((prev) => [...prev, { id: `new-${Date.now()}`, subpath: '', redirectLink: '' }]);
@@ -177,7 +183,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, [editableLinks, glnkUsername, queryClient, hasUnsavedChanges]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <NavBar
         username={glnkUsername}
         publicUrl={publicUrl}
@@ -190,45 +196,43 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         onLogout={logout}
       />
 
-      <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 py-8">
         {loginError === 'username_mismatch' && showMismatchMessage && (
           <MismatchAlert username={glnkUsername} onClose={() => setShowMismatchMessage(false)} />
         )}
 
         {saveSuccess && (
-          <div className="mb-8 p-6 bg-white border border-gray-200 rounded-2xl shadow-lg">
+          <div className="mb-6 p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
                 <CheckIcon className="w-5 h-5 text-green-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-gray-800 mb-1">Changes saved!</h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Changes saved!</h3>
+                <p className="text-sm text-gray-500 mb-4">
                   Your links have been updated. It may take a few minutes for changes to appear.
                 </p>
-                {deployCountdown > 0 ? (
-                  <a
-                    href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-400 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
-                    title="Check deploy status"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Estimated {Math.floor(deployCountdown / 60)}:{String(deployCountdown % 60).padStart(2, '0')}</span>
-                  </a>
-                ) : (
-                  <a
-                    href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors"
-                  >
-                    Check deploy status
-                  </a>
-                )}
+                <a
+                  href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-colors ${
+                    deployCountdown > 0
+                      ? 'text-gray-400 bg-gray-100 hover:bg-gray-200'
+                      : 'text-white bg-gray-900 hover:bg-gray-800'
+                  }`}
+                >
+                  {deployCountdown > 0 ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>~{Math.floor(deployCountdown / 60)}:{String(deployCountdown % 60).padStart(2, '0')}</span>
+                    </>
+                  ) : (
+                    'Check deploy status'
+                  )}
+                </a>
               </div>
               <button
                 onClick={() => setSaveSuccess(false)}
@@ -242,76 +246,79 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         )}
 
         {isEditMode || links.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="w-48 sm:w-64 text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                    Subpath
-                  </th>
-                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                    Redirect Link
-                  </th>
-                  <th className="w-10 sm:w-12 text-right pr-4">
-                    {canEdit && (
-                      isEditMode ? (
-                        <button
-                          onClick={handleSaveChanges}
-                          disabled={isSaving}
-                          className={`transition-colors ${isSaving ? 'text-gray-300' : 'text-gray-400 hover:text-green-600'}`}
-                          title={isSaving ? 'Saving...' : 'Save'}
-                          type="button"
-                        >
-                          {isSaving ? (
-                            <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                          ) : (
-                            <CheckIcon className="w-4 h-4" />
-                          )}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleEnterEditMode}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
-                          title="Edit"
-                          type="button"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                      )
-                    )}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {isEditMode
-                  ? editableLinks.map((link) => (
-                      <EditableRow
-                        key={link.id}
-                        id={link.id}
-                        subpath={link.subpath}
-                        redirectLink={link.redirectLink}
-                        onUpdate={handleUpdateLink}
-                        onDelete={handleDeleteLink}
-                      />
-                    ))
-                  : links.map(({ subpath, redirectLink }) => (
-                      <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />
-                    ))}
-              </tbody>
-            </table>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between py-4 px-4 sm:px-6 border-b border-gray-100">
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <span className="hidden sm:inline">Subpath / Redirect Link</span>
+                <span className="sm:hidden">Links</span>
+              </span>
+              {canEdit && (
+                <div className="flex items-center gap-3">
+                  {isEditMode ? (
+                    <>
+                      <button
+                        onClick={handleExitEditMode}
+                        disabled={isSaving}
+                        className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                        title="Cancel"
+                        type="button"
+                      >
+                        <CloseIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={handleSaveChanges}
+                        disabled={isSaving}
+                        className={`transition-colors ${isSaving ? 'text-gray-300' : 'text-gray-400 hover:text-orange-500'}`}
+                        title={isSaving ? 'Saving...' : 'Save'}
+                        type="button"
+                      >
+                        {isSaving ? (
+                          <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-500 rounded-full animate-spin" />
+                        ) : (
+                          <CheckIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleEnterEditMode}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Edit"
+                      type="button"
+                    >
+                      <PencilIcon className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div>
+              {isEditMode
+                ? editableLinks.map((link) => (
+                    <EditableRow
+                      key={link.id}
+                      id={link.id}
+                      subpath={link.subpath}
+                      redirectLink={link.redirectLink}
+                      onUpdate={handleUpdateLink}
+                      onDelete={handleDeleteLink}
+                    />
+                  ))
+                : links.map(({ subpath, redirectLink }) => (
+                    <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />
+                  ))}
+            </div>
             {isEditMode && (
               <EditControls
                 error={saveError}
                 isSaving={isSaving}
-                hasUnsavedChanges={hasUnsavedChanges}
                 onAdd={handleAddLink}
-                onCancel={handleExitEditMode}
               />
             )}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-gray-500">No links configured yet.</p>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
+            <p className="text-gray-400">No links configured yet.</p>
           </div>
         )}
       </main>
