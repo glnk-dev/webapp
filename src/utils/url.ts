@@ -28,12 +28,18 @@ export const getRedirectUrl = (
   pathname: string
 ): string | null => {
   for (const [pattern, url] of Object.entries(redirectMap)) {
-    const regexPattern = pattern.replace(/\/\{\$1\}/g, '/([^/]+)');
+    // Replace all {$N} with capture groups
+    const regexPattern = pattern.replace(/\{\$(\d+)\}/g, '([^/]+)');
     const regex = new RegExp(`^${regexPattern}$`);
     const match = pathname.match(regex);
 
     if (match) {
-      return url.replace('{$1}', match[1]);
+      // Replace all {$N} in URL with captured values
+      let result = url;
+      for (let i = 1; i < match.length; i++) {
+        result = result.replace(`{$${i}}`, match[i]);
+      }
+      return result;
     }
   }
   return null;
