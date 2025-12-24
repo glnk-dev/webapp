@@ -38,9 +38,9 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
   }, [generatedUrl]);
 
   return (
-    <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-      <td className="py-5 px-4 overflow-hidden">
-        <div className="flex flex-col gap-2">
+    <div className="flex items-start justify-between gap-4 py-5 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6">
+        <div className="flex flex-col gap-1 sm:w-48 flex-shrink-0">
           {variables.length > 0 &&
             variables.map((v) => (
               <input
@@ -50,38 +50,34 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
                 placeholder={v}
                 onChange={handleInputChange(v)}
                 onKeyDown={handleInputKeyDown(v)}
-                className="text-sm text-gray-900 bg-transparent border-b border-gray-300 focus:border-gray-900 focus:outline-none py-1 transition-colors w-full"
+                className="text-xs text-gray-400 bg-transparent border-b border-gray-200 focus:border-orange-400 focus:outline-none py-1 transition-colors w-full font-mono"
               />
             ))}
           <a
             href={`${publicUrl}${generatedSubpath}`}
-            className="text-sm text-gray-900 hover:text-gray-600 transition-colors font-mono truncate block"
+            className="text-sm text-gray-900 hover:text-orange-600 transition-colors font-mono truncate block"
             title={`${publicUrl}${generatedSubpath}`}
           >
             {generatedSubpath}
           </a>
         </div>
-      </td>
-      <td className="py-5 px-4">
         <a
           href={generatedUrl}
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors block truncate"
+          className="flex-1 text-sm text-gray-500 hover:text-gray-900 transition-colors block truncate"
           title={generatedUrl}
         >
           {generatedUrl}
         </a>
-      </td>
-      <td className="py-5 pr-4">
-        <button
-          onClick={handleCopy}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          title="Copy"
-          type="button"
-        >
-          <CopyIcon />
-        </button>
-      </td>
-    </tr>
+      </div>
+      <button
+        onClick={handleCopy}
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        title="Copy"
+        type="button"
+      >
+        <CopyIcon />
+      </button>
+    </div>
   );
 };
 

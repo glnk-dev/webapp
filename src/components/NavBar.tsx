@@ -37,15 +37,15 @@ export const NavBar: React.FC<NavBarProps> = ({
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-6 sm:px-8">
         <div className="flex items-center justify-between h-16">
           <a
             href={publicUrl}
             className="text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors"
           >
             <span className="font-bold">{username}</span>
-            <span className="text-gray-500">.glnk.dev</span>
+            <span className="text-gray-400">.glnk.dev</span>
           </a>
           {!staticMode && (
             isAuthenticated && user ? (
@@ -57,7 +57,7 @@ export const NavBar: React.FC<NavBarProps> = ({
                     className="w-8 h-8 rounded-full"
                   />
                 )}
-                <span className="text-sm text-gray-600">
+                <span className="text-sm font-medium text-gray-700">
                   {user.displayName || user.email || 'User'}
                 </span>
                 <button
@@ -73,11 +73,11 @@ export const NavBar: React.FC<NavBarProps> = ({
               <button
                 onClick={onLogin}
                 disabled={isSigningIn}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
                 type="button"
               >
-                <GitHubIcon />
-                <span className="text-sm">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
+                <GitHubIcon className="w-5 h-5" />
+                <span>{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
               </button>
             )
           )}
@@ -86,4 +86,3 @@ export const NavBar: React.FC<NavBarProps> = ({
     </nav>
   );
 };
-
