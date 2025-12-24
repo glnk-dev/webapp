@@ -40,24 +40,29 @@ export const NavBar: React.FC<NavBarProps> = ({
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-6 sm:px-8">
         <div className="flex items-center justify-between h-16">
-          <a
-            href={publicUrl}
-            className="text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors"
-          >
-            <span className="font-bold">{username}</span>
-            <span className="text-gray-400">.glnk.dev</span>
-          </a>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <a href="https://glnk.dev" className="flex-shrink-0" title="glnk.dev">
+              <img src="/favicon.png" alt="glnk.dev" className="w-6 h-6 sm:w-7 sm:h-7" />
+            </a>
+            <a
+              href={publicUrl}
+              className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors truncate"
+            >
+              <span className="font-bold">{username}</span>
+              <span className="text-gray-400">.glnk.dev</span>
+            </a>
+          </div>
           {!staticMode && (
             isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {user.photoURL && (
                   <img
                     src={user.photoURL}
                     alt={user.displayName || user.email || 'User'}
-                    className="w-8 h-8 rounded-full"
+                    className="w-7 h-7 rounded-full"
                   />
                 )}
-                <span className="text-sm font-medium text-gray-700">
+                <span className="hidden sm:inline text-sm font-medium text-gray-700 max-w-[150px] truncate">
                   {user.displayName || user.email || 'User'}
                 </span>
                 <button

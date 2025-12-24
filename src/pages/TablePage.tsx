@@ -183,7 +183,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, [editableLinks, glnkUsername, queryClient, hasUnsavedChanges]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavBar
         username={glnkUsername}
         publicUrl={publicUrl}
@@ -196,7 +196,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         onLogout={logout}
       />
 
-      <main className="max-w-6xl mx-auto px-6 sm:px-8 py-8">
+      <main className="flex-1 max-w-6xl mx-auto px-6 sm:px-8 py-8 w-full">
         {loginError === 'username_mismatch' && showMismatchMessage && (
           <MismatchAlert username={glnkUsername} onClose={() => setShowMismatchMessage(false)} />
         )}
@@ -322,6 +322,18 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
           </div>
         )}
       </main>
+
+      <footer className="mt-auto py-4">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <a
+            href="https://glnk.dev"
+            className="flex items-center justify-center gap-1.5 text-gray-300 hover:text-gray-500 transition-colors text-xs"
+          >
+            <img src="/favicon.png" alt="glnk.dev" className="w-4 h-4 opacity-50" />
+            <span>glnk.dev</span>
+          </a>
+        </div>
+      </footer>
 
       {showLoginOverlay && <LoginOverlay onLogin={login} />}
     </div>
