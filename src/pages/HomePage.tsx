@@ -116,10 +116,10 @@ const HomePage: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <a href="https://glnk.dev" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img src="/favicon.png" alt="glnk" className="w-8 h-8" />
               <span className="text-xl font-bold text-gray-900">glnk.dev</span>
-            </div>
+            </a>
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 {user.photoURL && (
