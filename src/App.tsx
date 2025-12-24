@@ -2,7 +2,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import RedirectComponent from './components/RedirectComponent';
 import './App.css';
 import TablePage from './pages/TablePage';
-import SignUpPage from './pages/SignUpPage';
+import HomePage from './pages/HomePage';
 import { getRedirectUrl, trimTrailingSlash } from './utils/url';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUrlMap } from './api';
@@ -13,7 +13,7 @@ function App() {
   if (isHomepage()) {
     return (
       <Routes>
-        <Route path="*" element={<SignUpPage />} />
+        <Route path="*" element={<HomePage />} />
       </Routes>
     );
   }
