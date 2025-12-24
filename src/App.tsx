@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import RedirectComponent from './components/RedirectComponent';
 import './App.css';
@@ -7,9 +8,16 @@ import { getRedirectUrl, trimTrailingSlash } from './utils/url';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUrlMap } from './api';
 import { QUERY_KEYS } from './constants';
-import { isHomepage } from './utils/env';
+import { isHomepage, getGlnkUsername } from './utils/env';
 
 function App() {
+  useEffect(() => {
+    const title = isHomepage()
+      ? 'glnk.dev · Short Links, Your Way'
+      : `${getGlnkUsername()}.glnk.dev · Short Links, Your Way`;
+    document.title = title;
+  }, []);
+
   if (isHomepage()) {
     return (
       <Routes>
