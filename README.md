@@ -7,12 +7,14 @@ The application is built and deployed to GitHub Pages using GitHub Actions.
 
 ## Features
 
-- Custom short link management
-- Redirection map generation
-- Multiple access modes (static, public, private, homepage)
-- Firebase authentication integration
-- Easy deployment to GitHub Pages
-- Environment variable support
+| Feature                       | Description                                                     |
+| ----------------------------- | --------------------------------------------------------------- |
+| **Short Link Management**     | Create and manage custom short links                            |
+| **Redirection Maps**          | Generate and manage URL redirection maps                        |
+| **Multiple Access Modes**     | Support for `static`, `public`, `private`, and `homepage` modes |
+| **Firebase Authentication**   | Integrated Firebase authentication for secure access            |
+| **GitHub Pages Deployment**   | Automated deployment via GitHub Actions                         |
+| **Environment Configuration** | Flexible environment variable support for different modes       |
 
 ## Getting Started
 
@@ -34,16 +36,26 @@ The application supports multiple access modes. To run locally, you need to set 
 
 #### Available Modes
 
-- **homepage**: Signup page for glnk.dev (no username required)
-- **static**: Read-only mode
-- **public**: Login to edit mode
-- **private**: Login required mode
+| Mode       | Description              | Username Required |
+| ---------- | ------------------------ | ----------------- |
+| `homepage` | Signup page for glnk.dev | No                |
+| `static`   | Read-only mode           | Yes               |
+| `public`   | Login to edit mode       | Yes               |
+| `private`  | Login required mode      | Yes               |
 
 #### Environment Setup
 
 Create environment files based on the mode you want to use:
 
-**For homepage mode** (`.env.homepage`):
+| Variable                     | Homepage Mode             | User Site Modes                   | Description                       |
+| ---------------------------- | ------------------------- | --------------------------------- | --------------------------------- |
+| `REACT_APP_GLNK_USERNAME`    | (empty)                   | `<your-glnk-username>`            | GitHub username used as subdomain |
+| `REACT_APP_GLNK_ACCESS_MODE` | `homepage`                | `static` \| `public` \| `private` | Site access mode                  |
+| `REACT_APP_FIREBASE_API_KEY` | `<your-firebase-api-key>` | `<your-firebase-api-key>`         | Firebase API key                  |
+| `REACT_APP_FIREBASE_APP_ID`  | `<your-firebase-app-id>`  | `<your-firebase-app-id>`          | Firebase App ID                   |
+| `PUBLIC_URL`                 | `/webapp`                 | `/webapp`                         | Public URL path                   |
+
+**Example for homepage mode** (`.env.homepage`):
 
 ```env
 REACT_APP_GLNK_USERNAME=
@@ -53,7 +65,7 @@ REACT_APP_FIREBASE_APP_ID=<your-firebase-app-id>
 PUBLIC_URL=/webapp
 ```
 
-**For user site modes** (`.env.private`, `.env.public`, `.env.static`):
+**Example for user site modes** (`.env.private`, `.env.public`, `.env.static`):
 
 ```env
 REACT_APP_GLNK_USERNAME=<your-glnk-username>
@@ -65,22 +77,13 @@ PUBLIC_URL=/webapp
 
 ### Start the development server:
 
-```bash
-# Homepage mode
-npm run start:homepage
-
-# Private mode (login required)
-npm run start:private
-
-# Public mode (login to edit)
-npm run start:public
-
-# Static mode (read-only)
-npm run start:static
-
-# Default (uses .env file)
-npm start
-```
+| Command                  | Mode       | Description              |
+| ------------------------ | ---------- | ------------------------ |
+| `npm run start:homepage` | `homepage` | Signup page for glnk.dev |
+| `npm run start:private`  | `private`  | Login required mode      |
+| `npm run start:public`   | `public`   | Login to edit mode       |
+| `npm run start:static`   | `static`   | Read-only mode           |
+| `npm start`              | Default    | Uses `.env` file         |
 
 ### Building for Production
 
@@ -113,7 +116,9 @@ The repository includes:
 
 The composite action accepts the following inputs:
 
-- `GLNK_USERNAME`: Your GitHub username (used as subdomain: username.glnk.dev). Not required for homepage mode.
-- `GLNK_ACCESS_MODE`: Site mode - `static` (read-only), `public` (login to edit), `private` (login required), `homepage` (glnk.dev signup page). Default: `static`.
-- `GLNK_PUBLIC_URL`: Custom domain URL (leave empty for default username.glnk.dev). Default: empty.
-- `GLNK_PATH_SEGMENTS`: Number of path segments to preserve for SPA routing (0 for root domain). Default: `0`.
+| Input                | Required | Default  | Description                                                                                                              |
+| -------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `GLNK_USERNAME`      | No       | `""`     | GitHub username (used as subdomain: username.glnk.dev). Not required for homepage mode.                                  |
+| `GLNK_ACCESS_MODE`   | No       | `static` | Site mode: `static` (read-only), `public` (login to edit), `private` (login required), `homepage` (glnk.dev signup page) |
+| `GLNK_PUBLIC_URL`    | No       | `""`     | Custom domain URL (leave empty for default username.glnk.dev)                                                            |
+| `GLNK_PATH_SEGMENTS` | No       | `0`      | Number of path segments to preserve for SPA routing (0 for root domain)                                                  |
