@@ -4,24 +4,30 @@ import RedirectComponent from './components/RedirectComponent';
 import './App.css';
 import TablePage from './pages/TablePage';
 import HomePage from './pages/HomePage';
+import ClipPage from './pages/ClipPage';
 import { getRedirectUrl, trimTrailingSlash } from './utils/url';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUrlMap } from './api';
 import { QUERY_KEYS } from './constants';
-import { isHomepage, getGlnkUsername } from './utils/env';
+import { isHomepage, isClipMode, getTitle } from './utils/env';
 
 function App() {
   useEffect(() => {
-    const title = isHomepage()
-      ? 'glnk.dev · Short Links, Your Way'
-      : `${getGlnkUsername()}.glnk.dev · Short Links, Your Way`;
-    document.title = title;
+    document.title = getTitle();
   }, []);
 
   if (isHomepage()) {
     return (
       <Routes>
         <Route path="*" element={<HomePage />} />
+      </Routes>
+    );
+  }
+
+  if (isClipMode()) {
+    return (
+      <Routes>
+        <Route path="*" element={<ClipPage />} />
       </Routes>
     );
   }

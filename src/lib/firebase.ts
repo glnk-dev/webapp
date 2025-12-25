@@ -41,5 +41,25 @@ export const updateLinks = functions
   ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'update_links')
   : null;
 
+export interface Clip {
+  id: string;
+  owner: string;
+  content: string;
+  createdAt: string;
+  expiresAt: string | null;
+}
+
+export const listClips = functions
+  ? httpsCallable<{ username: string }, { clips: Clip[]; isOwner: boolean }>(functions, 'list_clips')
+  : null;
+
+export const createClip = functions
+  ? httpsCallable<{ username: string; content: string }, { success: boolean; clip: Clip }>(functions, 'create_clip')
+  : null;
+
+export const deleteClip = functions
+  ? httpsCallable<{ username: string; clipId: string }, { success: boolean }>(functions, 'delete_clip')
+  : null;
+
 export { auth, githubProvider };
 export default app;

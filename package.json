@@ -18,6 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start:homepage": "env-cmd -f .env.homepage react-scripts start",
+    "start:clip": "env-cmd -f .env.clip react-scripts start",
     "start:private": "env-cmd -f .env.private react-scripts start",
     "start:public": "env-cmd -f .env.public react-scripts start",
     "start:static": "env-cmd -f .env.static react-scripts start",
