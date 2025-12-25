@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import {
@@ -76,6 +76,13 @@ const HomePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [siteExists, setSiteExists] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !githubLogin) {
+      setSubmitted(false);
+      setSiteExists(false);
+    }
+  }, [isAuthenticated, githubLogin]);
 
   const handleGitHubLogin = useCallback(async () => {
     setIsLoggingIn(true);
