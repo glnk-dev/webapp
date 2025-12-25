@@ -70,19 +70,16 @@ runs:
       shell: bash
       run: |
         mv community/users/glnk-$GLNK_USERNAME.yaml public/glnk.yaml || true
-        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g; s|PUBLIC_URL|$PUBLIC_URL|g" {} +
+        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME/$GLNK_USERNAME/g; s/GLNK_PATH_SEGMENTS/$GLNK_PATH_SEGMENTS/g" {} +
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
         GLNK_PATH_SEGMENTS: ${{ inputs.GLNK_PATH_SEGMENTS }}
-        PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
 
     - name: Setup homepage
       if: inputs.GLNK_ACCESS_MODE == 'homepage'
       shell: bash
       run: |
-        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME\.//g; s/GLNK_PATH_SEGMENTS/0/g; s|PUBLIC_URL|$PUBLIC_URL|g" {} +
-      env:
-        PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
+        find ./public -type f -name "*.html" -exec sed -i "s/GLNK_USERNAME\.//g; s/GLNK_PATH_SEGMENTS/0/g" {} +
 
     - name: Create .env file
       shell: bash
