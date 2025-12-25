@@ -29,39 +29,22 @@ runs:
       with:
         repository: glnk-dev/webapp
 
-    # - id: auth
-    #   name: Authenticate to Google Cloud
-    #   uses: google-github-actions/auth@v3
-    #   with:
-    #     project_id: glnk-dev
-    #     workload_identity_provider: projects/761634418776/locations/global/workloadIdentityPools/github/providers/glnk-dev--community
-
-    # - id: secrets
-    #   name: Get secrets from Google Secret Manager
-    #   uses: google-github-actions/get-secretmanager-secrets@v3
-    #   with:
-    #     secrets: |-
-    #       gh_app_id:glnk-dev/gh-app-glnk-manager-id
-    #       gh_app_private_key:glnk-dev/gh-app-glnk-manager-private-key
-    #       firebase_api_key:glnk-dev/glnk-dev-firebase-api-key
-    #       firebase_app_id:glnk-dev/glnk-dev-firebase-app-id
-
     - id: auth
       name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v3
       with:
-        workload_identity_provider: projects/1042177442694/locations/global/workloadIdentityPools/github/providers/glnk-dev
-        service_account: glnk-dev@playground-365100.iam.gserviceaccount.com
+        project_id: glnk-dev
+        workload_identity_provider: projects/761634418776/locations/global/workloadIdentityPools/github/providers/glnk-dev
 
     - id: secrets
       name: Get secrets from Google Secret Manager
       uses: google-github-actions/get-secretmanager-secrets@v3
       with:
         secrets: |-
-          gh_app_id:playground-365100/gh-app-glnk-manager-id
-          gh_app_private_key:playground-365100/gh-app-glnk-manager-private-key
-          firebase_api_key:playground-365100/glnk-dev-firebase-api-key
-          firebase_app_id:playground-365100/glnk-dev-firebase-app-id
+          gh_app_id:glnk-dev/gh-app-glnk-manager-id
+          gh_app_private_key:glnk-dev/gh-app-glnk-manager-private-key
+          firebase_api_key:glnk-dev/glnk-dev-firebase-api-key
+          firebase_app_id:glnk-dev/glnk-dev-firebase-app-id
 
     - uses: actions/create-github-app-token@v2
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
