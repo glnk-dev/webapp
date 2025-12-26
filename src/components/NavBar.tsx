@@ -52,7 +52,20 @@ export const NavBar: React.FC<NavBarProps> = ({
               <span className="text-gray-400">.glnk.dev</span>
             </a>
           </div>
-          {!staticMode && (
+          {staticMode ? (
+            <a
+              href="https://glnk.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-gray-400 transition-colors"
+            >
+              <span className="sm:hidden">glnk.dev</span>
+              <span className="hidden sm:inline">Get your own glnk.dev</span>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          ) : (
             isAuthenticated && user ? (
               <div className="flex items-center gap-2">
                 {user.photoURL && (
