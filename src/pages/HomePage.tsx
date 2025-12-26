@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import {
@@ -250,7 +251,9 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why glnk.dev?</h2>
-            <p className="text-lg text-gray-600">Simple, fast, and memorable short links for developers</p>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Save your LinkedIn, blog posts, documentation, and bookmarks with memorable short links.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -356,9 +359,16 @@ const HomePage: React.FC = () => {
       <footer className="py-8 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-gray-500">
-              <img src="/favicon.png" alt="glnk" className="w-5 h-5 opacity-50" />
-              <span className="text-sm">© 2026 glnk.dev</span>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-gray-500">
+                <img src="/favicon.png" alt="glnk" className="w-5 h-5 opacity-50" />
+                <span className="text-sm">© 2026 glnk.dev</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-400">
+                <Link to="/privacy" className="hover:text-gray-600 transition-colors">Privacy</Link>
+                <Link to="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
+                <a href="mailto:support@glnk.dev" className="hover:text-gray-600 transition-colors">Contact</a>
+              </div>
             </div>
             <div className="flex items-center gap-5 text-gray-400">
               <a href="https://github.com/glnk-dev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="GitHub">

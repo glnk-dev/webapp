@@ -4,6 +4,8 @@ import RedirectComponent from './components/RedirectComponent';
 import './App.css';
 import TablePage from './pages/TablePage';
 import HomePage from './pages/HomePage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 import { getRedirectUrl, trimTrailingSlash } from './utils/url';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUrlMap } from './api';
@@ -21,6 +23,8 @@ function App() {
   if (isHomepage()) {
     return (
       <Routes>
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
     );
