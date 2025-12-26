@@ -46,7 +46,7 @@ const TermsPage: React.FC = () => {
       <main className="pt-24 pb-16">
         <article className="max-w-3xl mx-auto px-6 sm:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
-          <p className="text-gray-400 text-sm mb-8">Last updated: December 25, 2026</p>
+          <p className="text-gray-400 text-sm mb-8">Last updated: December 25, 2025</p>
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Acceptance of Terms</h2>
