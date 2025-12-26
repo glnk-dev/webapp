@@ -1,15 +1,16 @@
 export const getPublicUrl = (): string => {
-  return process.env.PUBLIC_URL || '';
+  const base = import.meta.env.BASE_URL;
+  return base === '/' ? '' : base;
 };
 
 export const getGlnkUsername = (): string => {
-  return process.env.REACT_APP_GLNK_USERNAME || 'defaultUsername';
+  return import.meta.env.VITE_GLNK_USERNAME || 'defaultUsername';
 };
 
 export type AccessMode = 'static' | 'public' | 'private' | 'homepage';
 
 export const getAccessMode = (): AccessMode => {
-  const mode = process.env.REACT_APP_GLNK_ACCESS_MODE;
+  const mode = import.meta.env.VITE_GLNK_ACCESS_MODE;
   if (mode === 'static' || mode === 'private' || mode === 'homepage') {
     return mode;
   }

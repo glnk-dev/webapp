@@ -3,7 +3,7 @@
 [![Build and Deploy app to GitHub Pages](https://github.com/glnk-dev/webapp/actions/workflows/deploy-pages.yaml/badge.svg)](https://github.com/glnk-dev/webapp/actions/workflows/deploy-pages.yaml)
 
 This repository contains the React-based web application for managing custom short links with [glnk.dev](https://glnk.dev).
-The application is built and deployed to GitHub Pages using GitHub Actions.
+The application is built with Vite and deployed to GitHub Pages using GitHub Actions.
 
 ## Features
 
@@ -47,43 +47,39 @@ The application supports multiple access modes. To run locally, you need to set 
 
 Create environment files based on the mode you want to use:
 
-| Variable                     | Homepage Mode             | User Site Modes                   | Description                       |
-| ---------------------------- | ------------------------- | --------------------------------- | --------------------------------- |
-| `REACT_APP_GLNK_USERNAME`    | (empty)                   | `<your-glnk-username>`            | GitHub username used as subdomain |
-| `REACT_APP_GLNK_ACCESS_MODE` | `homepage`                | `static` \| `public` \| `private` | Site access mode                  |
-| `REACT_APP_FIREBASE_API_KEY` | `<your-firebase-api-key>` | `<your-firebase-api-key>`         | Firebase API key                  |
-| `REACT_APP_FIREBASE_APP_ID`  | `<your-firebase-app-id>`  | `<your-firebase-app-id>`          | Firebase App ID                   |
-| `PUBLIC_URL`                 | `/webapp`                 | `/webapp`                         | Public URL path                   |
+| Variable                 | Homepage Mode             | User Site Modes                   | Description                       |
+| ------------------------ | ------------------------- | --------------------------------- | --------------------------------- |
+| `VITE_GLNK_USERNAME`     | (empty)                   | `<your-glnk-username>`            | GitHub username used as subdomain |
+| `VITE_GLNK_ACCESS_MODE`  | `homepage`                | `static` \| `public` \| `private` | Site access mode                  |
+| `VITE_FIREBASE_API_KEY`  | `<your-firebase-api-key>` | `<your-firebase-api-key>`         | Firebase API key                  |
+| `VITE_FIREBASE_APP_ID`   | `<your-firebase-app-id>`  | `<your-firebase-app-id>`          | Firebase App ID                   |
 
 **Example for homepage mode** (`.env.homepage`):
 
 ```env
-REACT_APP_GLNK_USERNAME=
-REACT_APP_GLNK_ACCESS_MODE=homepage
-REACT_APP_FIREBASE_API_KEY=<your-firebase-api-key>
-REACT_APP_FIREBASE_APP_ID=<your-firebase-app-id>
-PUBLIC_URL=/webapp
+VITE_GLNK_ACCESS_MODE=homepage
+VITE_FIREBASE_API_KEY=<your-firebase-api-key>
+VITE_FIREBASE_APP_ID=<your-firebase-app-id>
 ```
 
 **Example for user site modes** (`.env.private`, `.env.public`, `.env.static`):
 
 ```env
-REACT_APP_GLNK_USERNAME=<your-glnk-username>
-REACT_APP_GLNK_ACCESS_MODE=<static|public|private>
-REACT_APP_FIREBASE_API_KEY=<your-firebase-api-key>
-REACT_APP_FIREBASE_APP_ID=<your-firebase-app-id>
-PUBLIC_URL=/webapp
+VITE_GLNK_USERNAME=<your-glnk-username>
+VITE_GLNK_ACCESS_MODE=<static|public|private>
+VITE_FIREBASE_API_KEY=<your-firebase-api-key>
+VITE_FIREBASE_APP_ID=<your-firebase-app-id>
 ```
 
 ### Start the development server:
 
-| Command                  | Mode       | Description              |
-| ------------------------ | ---------- | ------------------------ |
-| `npm run start:homepage` | `homepage` | Signup page for glnk.dev |
-| `npm run start:private`  | `private`  | Login required mode      |
-| `npm run start:public`   | `public`   | Login to edit mode       |
-| `npm run start:static`   | `static`   | Read-only mode           |
-| `npm start`              | Default    | Uses `.env` file         |
+| Command                | Mode       | Description              |
+| ---------------------- | ---------- | ------------------------ |
+| `npm run dev:homepage` | `homepage` | Signup page for glnk.dev |
+| `npm run dev:private`  | `private`  | Login required mode      |
+| `npm run dev:public`   | `public`   | Login to edit mode       |
+| `npm run dev:static`   | `static`   | Read-only mode           |
+| `npm run dev`          | Default    | Uses `.env` file         |
 
 ### Building for Production
 
@@ -120,5 +116,5 @@ The composite action accepts the following inputs:
 | -------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `GLNK_USERNAME`      | No       | `""`     | GitHub username (used as subdomain: username.glnk.dev). Not required for homepage mode.                                  |
 | `GLNK_ACCESS_MODE`   | No       | `static` | Site mode: `static` (read-only), `public` (login to edit), `private` (login required), `homepage` (glnk.dev signup page) |
-| `GLNK_PUBLIC_URL`    | No       | `""`     | Custom domain URL (leave empty for default username.glnk.dev)                                                            |
+| `GLNK_PUBLIC_URL`    | No       | `""`     | Base URL path for subpath deployments (e.g., `/webapp` for github.io)                                                    |
 | `GLNK_PATH_SEGMENTS` | No       | `0`      | Number of path segments to preserve for SPA routing (0 for root domain)                                                  |

@@ -10,10 +10,10 @@ let githubProvider: GithubAuthProvider | null = null;
 
 if (!isStatic()) {
   const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY || '',
     authDomain: 'glnk-dev.firebaseapp.com',
     projectId: 'glnk-dev',
-    appId: process.env.REACT_APP_FIREBASE_APP_ID || '',
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
   };
 
   try {

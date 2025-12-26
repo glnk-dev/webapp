@@ -84,10 +84,10 @@ runs:
     - name: Create .env file
       shell: bash
       run: |
-        echo REACT_APP_GLNK_USERNAME=$GLNK_USERNAME > .env
-        echo REACT_APP_GLNK_ACCESS_MODE=$GLNK_ACCESS_MODE >> .env
-        echo REACT_APP_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
-        echo REACT_APP_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
+        echo VITE_GLNK_USERNAME=$GLNK_USERNAME > .env
+        echo VITE_GLNK_ACCESS_MODE=$GLNK_ACCESS_MODE >> .env
+        echo VITE_FIREBASE_API_KEY=$FIREBASE_API_KEY >> .env
+        echo VITE_FIREBASE_APP_ID=$FIREBASE_APP_ID >> .env
       env:
         GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
         GLNK_ACCESS_MODE: ${{ inputs.GLNK_ACCESS_MODE }}
@@ -113,9 +113,9 @@ runs:
 
     - name: Build project
       shell: bash
-      run: npm run build
+      run: npm run build ${GLNK_PUBLIC_URL:+-- --base="$GLNK_PUBLIC_URL"}
       env:
-        PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
+        GLNK_PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
