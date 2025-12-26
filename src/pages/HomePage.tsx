@@ -383,9 +383,12 @@ const HomePage: React.FC = () => {
                 <span className="text-sm">© 2026 glnk.dev</span>
               </div>
               <div className="flex items-center gap-4 text-xs text-gray-400">
+                <Link to="/docs" className="hover:text-gray-600 transition-colors">Docs</Link>
+                <Link to="/guide" className="hover:text-gray-600 transition-colors">Guide</Link>
+                <Link to="/faq" className="hover:text-gray-600 transition-colors">FAQ</Link>
+                <span className="text-gray-300">|</span>
                 <Link to="/privacy" className="hover:text-gray-600 transition-colors">Privacy</Link>
                 <Link to="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
-                <a href="mailto:support@glnk.dev" className="hover:text-gray-600 transition-colors">Contact</a>
               </div>
             </div>
             <div className="flex items-center gap-5 text-gray-400">
