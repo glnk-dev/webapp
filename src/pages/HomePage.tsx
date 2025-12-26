@@ -54,6 +54,12 @@ const EXAMPLES = [
   { short: 'gcp.glnk.dev/gke', desc: 'GKE Clusters' },
 ] as const;
 
+const getPersonalExamples = (username: string) => [
+  { short: `${username}.glnk.dev/blog`, desc: 'Blog' },
+  { short: `${username}.glnk.dev/cal`, desc: 'Calendar' },
+  { short: `${username}.glnk.dev/cv`, desc: 'Resume' },
+];
+
 const STEPS = [
   { step: '1', title: 'Sign in with GitHub', desc: 'Your GitHub username becomes your subdomain' },
   { step: '2', title: 'Add your links', desc: 'Configure your short links through our web interface' },
@@ -242,6 +248,18 @@ const HomePage: React.FC = () => {
                 <span className="font-mono text-orange-600">{ex.short}</span>
                 <span className="text-gray-400 ml-2">→ {ex.desc}</span>
               </a>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            {getPersonalExamples(githubLogin || 'yourname').map((ex) => (
+              <div
+                key={ex.short}
+                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-default"
+              >
+                <span className="font-mono text-orange-600">{ex.short}</span>
+                <span className="text-gray-400 ml-2">→ {ex.desc}</span>
+              </div>
             ))}
           </div>
         </div>
