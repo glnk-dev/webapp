@@ -113,7 +113,9 @@ runs:
 
     - name: Build project
       shell: bash
-      run: npm run build
+      run: npm run build ${GLNK_PUBLIC_URL:+-- --base="$GLNK_PUBLIC_URL"}
+      env:
+        GLNK_PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
