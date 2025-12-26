@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { GitHubIcon } from '../components/icons/GitHubIcon';
+import { XIcon, MailIcon } from '../components/icons/FeatureIcons';
+import { useAuth } from '../contexts/AuthContext';
 
 const PrivacyPage: React.FC = () => {
+  const { login, isAuthenticated, user, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -11,6 +16,29 @@ const PrivacyPage: React.FC = () => {
               <img src="/favicon.png" alt="glnk" className="w-8 h-8" />
               <span className="text-xl font-bold text-gray-900">glnk.dev</span>
             </Link>
+            {isAuthenticated && user ? (
+              <div className="flex items-center gap-3">
+                {user.photoURL && (
+                  <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full" />
+                )}
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={login}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                <GitHubIcon className="w-5 h-5" />
+                <span>Sign in</span>
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -148,6 +176,17 @@ const PrivacyPage: React.FC = () => {
                 <Link to="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
                 <a href="mailto:support@glnk.dev" className="hover:text-gray-600 transition-colors">Contact</a>
               </div>
+            </div>
+            <div className="flex items-center gap-5 text-gray-400">
+              <a href="https://github.com/glnk-dev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="GitHub">
+                <GitHubIcon className="w-5 h-5" />
+              </a>
+              <a href="https://x.com/GlnkDev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="@GlnkDev">
+                <XIcon className="w-5 h-5" />
+              </a>
+              <a href="mailto:support@glnk.dev" className="hover:text-gray-900 transition-colors" title="support@glnk.dev">
+                <MailIcon className="w-5 h-5" />
+              </a>
             </div>
           </div>
         </div>
