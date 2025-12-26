@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename={process.env.PUBLIC_URL}>
+    <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <App />
