@@ -48,4 +48,3 @@ export const getRedirectUrl = (
 export const trimTrailingSlash = (path: string): string => {
   return path.replace(/\/$/, '');
 };
-

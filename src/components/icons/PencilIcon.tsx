@@ -22,4 +22,3 @@ export const PencilIcon: React.FC<PencilIconProps> = ({ className = 'w-4 h-4' })
 );
 
 export default PencilIcon;
-

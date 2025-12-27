@@ -70,4 +70,3 @@ export const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin }) => {
     </div>
   );
 };
-

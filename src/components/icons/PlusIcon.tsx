@@ -22,4 +22,3 @@ export const PlusIcon: React.FC<PlusIconProps> = ({ className = 'w-4 h-4' }) => 
 );
 
 export default PlusIcon;
-

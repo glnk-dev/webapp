@@ -22,4 +22,3 @@ export const TrashIcon: React.FC<TrashIconProps> = ({ className = 'w-4 h-4' }) =
 );
 
 export default TrashIcon;
-

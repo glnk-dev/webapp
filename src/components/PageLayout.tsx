@@ -85,5 +85,3 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
 };
 
 export default PageLayout;
-
-
