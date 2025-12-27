@@ -5,7 +5,7 @@ import PageLayout from '../../components/PageLayout';
 const DocsPage: React.FC = () => {
   return (
     <PageLayout>
-      <article className="max-w-3xl mx-auto px-6 sm:px-8">
+      <article className="max-w-3xl mx-auto px-6 sm:px-8 overflow-x-hidden">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Documentation</h1>
         <p className="text-gray-400 text-sm mb-8">Everything you need to know about glnk.dev</p>
 
@@ -57,22 +57,22 @@ const DocsPage: React.FC = () => {
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Link Format</h2>
-          <div className="bg-gray-50 rounded-xl p-6 font-mono text-sm">
+          <div className="bg-gray-50 rounded-xl p-6 font-mono text-sm overflow-x-auto">
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="text-orange-600">yourname.glnk.dev/blog</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-orange-600">you.glnk.dev/blog</span>
                 <span className="text-gray-400">→</span>
-                <span className="text-gray-600">https://yourblog.com</span>
+                <span className="text-gray-600 break-all">yourblog.com</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-orange-600">yourname.glnk.dev/cv</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-orange-600">you.glnk.dev/cv</span>
                 <span className="text-gray-400">→</span>
-                <span className="text-gray-600">https://resume.io/yourname</span>
+                <span className="text-gray-600 break-all">resume.io/you</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-orange-600">yourname.glnk.dev/cal</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-orange-600">you.glnk.dev/cal</span>
                 <span className="text-gray-400">→</span>
-                <span className="text-gray-600">https://calendly.com/yourname</span>
+                <span className="text-gray-600 break-all">calendly.com/you</span>
               </div>
             </div>
           </div>
@@ -81,14 +81,14 @@ const DocsPage: React.FC = () => {
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Cloud Console Shortcuts</h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            We provide pre-built shortcuts for AWS and GCP consoles. No setup required - just use them:
+            Pre-built shortcuts for AWS and GCP consoles:
           </p>
-          <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
+          <div className="bg-gray-900 rounded-xl p-4 sm:p-6 font-mono text-xs sm:text-sm overflow-x-auto">
             <div className="space-y-2 text-gray-300">
-              <div><span className="text-orange-400">aws.glnk.dev/s3</span> <span className="text-gray-500">→ S3 Console</span></div>
-              <div><span className="text-orange-400">aws.glnk.dev/ec2</span> <span className="text-gray-500">→ EC2 Instances</span></div>
-              <div><span className="text-orange-400">aws.glnk.dev/lambda</span> <span className="text-gray-500">→ Lambda Functions</span></div>
-              <div><span className="text-orange-400">gcp.glnk.dev/gke</span> <span className="text-gray-500">→ GKE Clusters</span></div>
+              <div><span className="text-orange-400">aws.glnk.dev/s3</span> <span className="text-gray-500">→ S3</span></div>
+              <div><span className="text-orange-400">aws.glnk.dev/ec2</span> <span className="text-gray-500">→ EC2</span></div>
+              <div><span className="text-orange-400">aws.glnk.dev/lambda</span> <span className="text-gray-500">→ Lambda</span></div>
+              <div><span className="text-orange-400">gcp.glnk.dev/gke</span> <span className="text-gray-500">→ GKE</span></div>
               <div><span className="text-orange-400">gcp.glnk.dev/bq</span> <span className="text-gray-500">→ BigQuery</span></div>
             </div>
           </div>
