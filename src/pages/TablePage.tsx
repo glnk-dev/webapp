@@ -9,6 +9,7 @@ import { LoginOverlay } from '../components/LoginOverlay';
 import { PencilIcon } from '../components/icons/PencilIcon';
 import { CheckIcon } from '../components/icons/CheckIcon';
 import { CloseIcon } from '../components/icons/CloseIcon';
+import { VideoAdPlayer } from '../components/VideoAdPlayer';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
 import { TablePageProps } from '../types';
@@ -21,6 +22,9 @@ interface EditableLink {
   redirectLink: string;
 }
 
+const DEPLOY_AD_KEY = 'glnk_deploy_ad_until';
+const DEPLOY_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const glnkUsername = getGlnkUsername();
   const publicUrl = getPublicUrl();
@@ -32,16 +36,25 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [deployCountdown, setDeployCountdown] = useState(0);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
-  const [editLockedUntil, setEditLockedUntil] = useState<number | null>(null);
+  const [adKey, setAdKey] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [savedLinks, setSavedLinks] = useState<{ subpath: string; redirectLink: string }[] | null>(null);
+  const [editLockWarningShown, setEditLockWarningShown] = useState(false);
+  
+  const [showDeployAd, setShowDeployAd] = useState(() => {
+    const stored = localStorage.getItem(DEPLOY_AD_KEY);
+    if (stored) {
+      const expiresAt = parseInt(stored, 10);
+      return Date.now() < expiresAt;
+    }
+    return false;
+  });
 
   const showLoginOverlay = privateMode && !isAuthenticated;
-  const isEditLocked = editLockedUntil !== null && Date.now() < editLockedUntil;
-  const canEdit = isAuthenticated && !staticMode && !isEditLocked;
+  const isEditLocked = showDeployAd;
 
   const links = useMemo(
     () => Object.entries(redirectMap).map(([key, value]) => ({ subpath: key, redirectLink: value })),
@@ -89,20 +102,40 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, [toEditableLinks]);
 
   useEffect(() => {
-    if (!saveSuccess) return;
-    setDeployCountdown(300);
-    const interval = setInterval(() => {
-      setDeployCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
+    if (!editLockWarningShown) return;
+    const handleClick = () => setEditLockWarningShown(false);
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClick, { once: true });
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClick);
+    };
+  }, [editLockWarningShown]);
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const stored = localStorage.getItem(DEPLOY_AD_KEY);
+      if (stored) {
+        const expiresAt = parseInt(stored, 10);
+        const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+        setRemainingSeconds(remaining);
+        
+        if (remaining <= 0) {
+          localStorage.removeItem(DEPLOY_AD_KEY);
+          setShowDeployAd(false);
+          setSavedLinks(null);
           queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
-          return 0;
         }
-        return prev - 1;
-      });
-    }, 1000);
+      } else {
+        setRemainingSeconds(0);
+      }
+    };
+    
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [saveSuccess, queryClient]);
+  }, [queryClient]);
 
   const handleLogin = useCallback(async () => {
     setIsSigningIn(true);
@@ -116,6 +149,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const handleEnterEditMode = useCallback(() => {
     setIsEditMode(true);
     setSaveError(null);
+    setEditLockWarningShown(false);
   }, []);
 
   const handleExitEditMode = useCallback(() => {
@@ -171,10 +205,12 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         username: glnkUsername,
         links: editableLinks.map((l) => ({ subpath: l.subpath.trim(), redirectLink: l.redirectLink.trim() })),
       });
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
+      setSavedLinks(editableLinks.map((l) => ({ subpath: l.subpath.trim(), redirectLink: l.redirectLink.trim() })));
       setIsEditMode(false);
-      setSaveSuccess(true);
-      setEditLockedUntil(Date.now() + 60000);
+      const expiresAt = Date.now() + DEPLOY_DURATION;
+      localStorage.setItem(DEPLOY_AD_KEY, expiresAt.toString());
+      setShowDeployAd(true);
+      setAdKey(0);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Failed to save changes');
     } finally {
@@ -201,58 +237,59 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
           <MismatchAlert username={glnkUsername} onClose={() => setShowMismatchMessage(false)} />
         )}
 
-        {saveSuccess && (
-          <div className="mb-6 p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                <CheckIcon className="w-5 h-5 text-green-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">Changes saved!</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  Your links have been updated. It may take a few minutes for changes to appear.
-                </p>
+        {showDeployAd && (
+          <div className="mb-6 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="5" y="11" width="14" height="10" rx="2" />
+                      <path d="M8 11V7a4 4 0 018 0v4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white">Deploying your changes...</h3>
+                    <p className="text-sm text-white/80">
+                      Editing locked for {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, '0')}
+                    </p>
+                  </div>
+                </div>
                 <a
                   href={`https://github.com/glnk-dev/glnk-${glnkUsername}/actions/workflows/deploy-pages.yaml`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-colors ${
-                    deployCountdown > 0
-                      ? 'text-gray-400 bg-gray-100 hover:bg-gray-200'
-                      : 'text-white bg-gray-900 hover:bg-gray-800'
-                  }`}
+                  className="bg-white text-orange-600 hover:bg-orange-50 px-4 py-2 text-sm font-medium rounded-xl transition-colors text-center"
                 >
-                  {deployCountdown > 0 ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>~{Math.floor(deployCountdown / 60)}:{String(deployCountdown % 60).padStart(2, '0')}</span>
-                    </>
-                  ) : (
-                    'Check deploy status'
-                  )}
+                  View Action
                 </a>
               </div>
-              <button
-                onClick={() => setSaveSuccess(false)}
-                className="flex-shrink-0 text-gray-300 hover:text-gray-500 transition-colors"
-                type="button"
-              >
-                <span className="text-xl leading-none">×</span>
-              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-full max-w-lg aspect-video">
+                  <VideoAdPlayer
+                    key={adKey}
+                    autoplay
+                    onAdComplete={() => setAdKey(k => k + 1)}
+                    onAdError={() => setAdKey(k => k + 1)}
+                  />
+                </div>
+                <p className="text-xs text-gray-400">Thank you for supporting glnk.dev!</p>
+              </div>
             </div>
           </div>
         )}
 
-        {isEditMode || links.length > 0 ? (
+        {isEditMode || (savedLinks || links).length > 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between py-4 px-4 sm:px-6 border-b border-gray-100">
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
                 <span className="hidden sm:inline">Subpath / Redirect Link</span>
                 <span className="sm:hidden">Links</span>
               </span>
-              {canEdit && (
+              {isAuthenticated && !staticMode && (
                 <div className="flex items-center gap-3">
                   {isEditMode ? (
                     <>
@@ -279,6 +316,34 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                         )}
                       </button>
                     </>
+                  ) : isEditLocked ? (
+                    <div className="relative">
+                      <button
+                        onClick={() => {
+                          if (editLockWarningShown) {
+                            setEditLockWarningShown(false);
+                            handleEnterEditMode();
+                          } else {
+                            setEditLockWarningShown(true);
+                          }
+                        }}
+                        className={`transition-colors ${
+                          editLockWarningShown 
+                            ? 'text-orange-500 hover:text-orange-600' 
+                            : 'text-gray-300 hover:text-gray-400'
+                        }`}
+                        title={editLockWarningShown ? "Click again to edit anyway" : "Editing locked during deployment"}
+                        type="button"
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                      {editLockWarningShown && (
+                        <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-amber-50 border border-amber-200 rounded-xl shadow-lg z-10">
+                          <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Deployment in progress</p>
+                          <p className="text-xs text-amber-700">Editing now may cause conflicts. Click the edit button again if you still want to proceed.</p>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <button
                       onClick={handleEnterEditMode}
@@ -304,7 +369,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
                       onDelete={handleDeleteLink}
                     />
                   ))
-                : links.map(({ subpath, redirectLink }) => (
+                : (savedLinks || links).map(({ subpath, redirectLink }) => (
                     <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />
                   ))}
             </div>
