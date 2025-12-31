@@ -21,7 +21,7 @@ const InlineInput: React.FC<{
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
       style={{ width }}
-      className="inline-block text-center text-gray-700 placeholder:text-gray-400 bg-gray-100 hover:bg-gray-200 focus:bg-white focus:ring-2 focus:ring-orange-200 rounded-full px-2 py-0.5 text-sm font-mono focus:outline-none transition-all duration-200"
+      className="inline-block text-center text-gray-700 placeholder:text-gray-400 bg-gray-100 hover:bg-gray-200 focus:bg-white focus:ring-2 focus:ring-orange-200 rounded-full px-2 py-0.5 text-xs sm:text-sm font-mono focus:outline-none transition-all duration-200"
     />
   );
 };
@@ -115,7 +115,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
   return (
     <div className="flex items-center justify-between gap-4 py-5 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
       <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-        <div className="sm:w-56 flex-shrink-0 font-mono text-sm text-gray-900 flex items-center flex-wrap gap-1">
+        <div className="sm:w-56 flex-shrink-0 font-mono text-xs sm:text-sm text-gray-900 flex items-center flex-wrap gap-1">
           {hasVariables ? (
             renderWithVariables(subpath, varMap, variables, handleVarChange, handleKeyDown)
           ) : (
@@ -128,7 +128,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
             </a>
           )}
         </div>
-        <div className="flex-1 text-sm text-gray-500 flex items-center flex-wrap gap-1 min-w-0">
+        <div className="flex-1 text-xs sm:text-sm text-gray-500 flex items-center flex-wrap gap-1 min-w-0">
           {hasVariables ? (
             renderWithVariables(template, varMap, variables, handleVarChange, handleKeyDown)
           ) : (

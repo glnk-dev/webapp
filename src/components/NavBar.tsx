@@ -13,6 +13,7 @@ interface NavBarProps {
   hasUnsavedChanges: boolean;
   onLogin: () => void;
   onLogout: () => void;
+  topOffset?: number;
 }
 
 export const NavBar: React.FC<NavBarProps> = ({
@@ -25,6 +26,7 @@ export const NavBar: React.FC<NavBarProps> = ({
   hasUnsavedChanges,
   onLogin,
   onLogout,
+  topOffset = 0,
 }) => {
   const handleLogout = () => {
     if (hasUnsavedChanges) {
@@ -37,7 +39,7 @@ export const NavBar: React.FC<NavBarProps> = ({
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <nav className="fixed left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100" style={{ top: `${topOffset}px` }}>
       <div className="max-w-6xl mx-auto px-6 sm:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
