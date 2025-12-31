@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { GitHubIcon } from '../components/icons/GitHubIcon';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
@@ -14,6 +14,7 @@ import {
 } from '../components/icons/FeatureIcons';
 import { useAuth } from '../contexts/AuthContext';
 import { requestSignup } from '../lib/firebase';
+import { DeployingBanner } from '../components/DeployingBanner';
 
 const FEATURES = [
   {
@@ -77,19 +78,67 @@ const getDefaultLinks = (username: string) => [
   { subpath: '/blog', redirectLink: `https://${username}.github.io` },
 ];
 
+const SIGNUP_BANNER_KEY = 'glnk_signup_banner_until';
+const SIGNUP_BANNER_DURATION = 5 * 60 * 1000; // 5 minutes
+const SIGNUP_COUNTDOWN_SECONDS = 300; // 5 minutes
+
 const HomePage: React.FC = () => {
   const { login, isAuthenticated, user, githubLogin, logout } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [siteExists, setSiteExists] = useState(false);
+  const [showBanner, setShowBanner] = useState(() => {
+    const stored = localStorage.getItem(SIGNUP_BANNER_KEY);
+    if (stored) {
+      const expiresAt = parseInt(stored, 10);
+      return Date.now() < expiresAt;
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (!isAuthenticated || !githubLogin) {
       setSubmitted(false);
       setSiteExists(false);
+      setShowBanner(false);
+      setIsSubmitting(false);
+      localStorage.removeItem(SIGNUP_BANNER_KEY);
     }
   }, [isAuthenticated, githubLogin]);
+
+  useEffect(() => {
+    const checkExpiry = () => {
+      const stored = localStorage.getItem(SIGNUP_BANNER_KEY);
+      if (stored) {
+        const expiresAt = parseInt(stored, 10);
+        if (Date.now() >= expiresAt) {
+          localStorage.removeItem(SIGNUP_BANNER_KEY);
+          setShowBanner(false);
+        }
+      }
+    };
+    
+    checkExpiry();
+    const interval = setInterval(checkExpiry, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const bannerInitialSeconds = useMemo(() => {
+    if (showBanner) {
+      const stored = localStorage.getItem(SIGNUP_BANNER_KEY);
+      if (stored) {
+        const expiresAt = parseInt(stored, 10);
+        return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      }
+    }
+    return SIGNUP_COUNTDOWN_SECONDS;
+  }, [showBanner]);
+
+  const handleBannerComplete = useCallback(() => {
+    localStorage.removeItem(SIGNUP_BANNER_KEY);
+    setShowBanner(false);
+  }, []);
 
   const handleGitHubLogin = useCallback(async () => {
     setIsLoggingIn(true);
@@ -107,6 +156,9 @@ const HomePage: React.FC = () => {
     try {
       await requestSignup({ username: githubLogin, links: getDefaultLinks(githubLogin) });
       setSubmitted(true);
+      const expiresAt = Date.now() + SIGNUP_BANNER_DURATION;
+      localStorage.setItem(SIGNUP_BANNER_KEY, expiresAt.toString());
+      setShowBanner(true);
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };
       const isAlreadyExists = error.code?.includes('already-exists') || error.message?.toLowerCase().includes('already exists');
@@ -123,7 +175,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   const siteUrl = githubLogin ? `https://${githubLogin}.glnk.dev` : '#';
-  const hasSite = submitted || siteExists;
+  const hasSite = (submitted || siteExists) && !showBanner;
 
   return (
     <div className="min-h-screen bg-white">
@@ -188,7 +240,7 @@ const HomePage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="inline-block px-8 py-5 bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors shadow-lg shadow-orange-500/25"
               >
-                <p className="text-sm text-orange-100 mb-1">{submitted ? 'Site created!' : 'Go to your site'}</p>
+                <p className="text-sm text-orange-100 mb-1">Check my site</p>
                 <p className="text-2xl font-bold text-white flex items-center gap-2">
                   <span>{githubLogin}.glnk.dev</span>
                   <ExternalLinkIcon className="w-5 h-5 opacity-75" />
@@ -203,23 +255,37 @@ const HomePage: React.FC = () => {
                     <span className="text-gray-400">.glnk.dev</span>
                   </p>
                 </div>
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleSignup}
-                    disabled={isSubmitting}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-orange-500/25"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      'Create my site'
-                    )}
-                  </button>
-                </div>
+                {showBanner && githubLogin ? (
+                  <div className="w-full max-w-md mx-auto">
+                    <DeployingBanner 
+                      username={githubLogin} 
+                      onComplete={handleBannerComplete}
+                      initialSeconds={bannerInitialSeconds}
+                      variant="inline"
+                      title="Provisioning your site..."
+                      subtitle="This may take a few minutes ({time} remaining)"
+                      showActionButton={false}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleSignup}
+                      disabled={isSubmitting}
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-orange-500/25"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create my site'
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -379,7 +445,6 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4 sm:gap-6">
               <img src="/favicon.png" alt="glnk" className="w-5 h-5 opacity-50" />
-              <span className="hidden sm:inline text-sm text-gray-500">© 2026 glnk.dev</span>
               <div className="flex items-center gap-3 sm:gap-4 text-xs text-gray-400">
                 <Link to="/docs" className="hover:text-gray-600 transition-colors">Docs</Link>
                 <Link to="/guide" className="hover:text-gray-600 transition-colors">Guide</Link>
