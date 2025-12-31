@@ -56,7 +56,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4 sm:gap-6">
               <img src="/favicon.png" alt="glnk" className="w-5 h-5 opacity-50" />
-              <span className="hidden sm:inline text-sm text-gray-500">© 2026 glnk.dev</span>
               <div className="flex items-center gap-3 sm:gap-4 text-xs text-gray-400">
                 <Link to="/docs" className="hover:text-gray-600 transition-colors">Docs</Link>
                 <Link to="/guide" className="hover:text-gray-600 transition-colors">Guide</Link>
