@@ -228,8 +228,10 @@ const HomePage: React.FC = () => {
               <span className="text-orange-500"> short links</span>
             </h1>
             <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-              Get your own <code className="px-2 py-1 bg-gray-100 rounded text-orange-600 font-mono text-lg">yourname.glnk.dev</code> subdomain.
-              <br className="hidden sm:block" />
+              Get your own{' '}
+              <code className="px-2 py-1 bg-gray-100 rounded text-orange-600 font-mono text-lg">yourname.glnk.dev</code>{' '}
+              subdomain.
+              <br />
               Create go-links that actually make sense.
             </p>
 
