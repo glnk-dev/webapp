@@ -64,21 +64,23 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
     [redirectMap]
   );
 
+  const filterByQuery = useCallback(<T extends { subpath: string; redirectLink: string }>(items: T[]): T[] => {
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter((l) => l.subpath.toLowerCase().includes(q) || l.redirectLink.toLowerCase().includes(q));
+  }, [searchQuery]);
+
   const displayLinks = useMemo(() => {
-    let result = savedLinks || links;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (l) => l.subpath.toLowerCase().includes(q) || l.redirectLink.toLowerCase().includes(q)
-      );
-    }
+    let result = filterByQuery(savedLinks || links);
     if (sortAsc !== null) {
       result = [...result].sort((a, b) =>
         sortAsc ? a.subpath.localeCompare(b.subpath) : b.subpath.localeCompare(a.subpath)
       );
     }
     return result;
-  }, [savedLinks, links, searchQuery, sortAsc]);
+  }, [savedLinks, links, filterByQuery, sortAsc]);
+
+  const filteredEditableLinks = useMemo(() => filterByQuery(editableLinks), [filterByQuery, editableLinks]);
 
   const toEditableLinks = useCallback(
     () => Object.entries(redirectMap).map(([subpath, redirectLink], i) => ({ id: `link-${i}`, subpath, redirectLink })),
@@ -257,16 +259,20 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
             />
             <div>
               {isEditMode
-                ? editableLinks.map((link) => (
-                    <EditableRow
-                      key={link.id}
-                      id={link.id}
-                      subpath={link.subpath}
-                      redirectLink={link.redirectLink}
-                      onUpdate={handleUpdateLink}
-                      onDelete={handleDeleteLink}
-                    />
-                  ))
+                ? filteredEditableLinks.length > 0
+                  ? filteredEditableLinks.map((link) => (
+                      <EditableRow
+                        key={link.id}
+                        id={link.id}
+                        subpath={link.subpath}
+                        redirectLink={link.redirectLink}
+                        onUpdate={handleUpdateLink}
+                        onDelete={handleDeleteLink}
+                      />
+                    ))
+                  : searchQuery
+                    ? <div className="py-8 text-center text-sm text-gray-400">No links matching "{searchQuery}"</div>
+                    : null
                 : displayLinks.length > 0
                   ? displayLinks.map(({ subpath, redirectLink }) => (
                       <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />

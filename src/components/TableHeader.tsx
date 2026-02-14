@@ -46,7 +46,7 @@ const SearchInput: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="Filter links..."
-      className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-100 rounded-lg focus:border-orange-200 focus:bg-white focus:outline-none transition-all placeholder:text-gray-300"
+      className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-100 rounded-lg focus:border-orange-200 focus:bg-white focus:outline-none placeholder:text-gray-300"
     />
     {value && (
       <button
@@ -129,17 +129,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   return (
     <div className="flex items-center justify-between gap-2 py-3 px-4 sm:px-6 border-b border-gray-100">
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        {isEditMode ? (
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-            <span className="hidden sm:inline">Subpath / Redirect Link</span>
-            <span className="sm:hidden">Links</span>
-          </span>
-        ) : (
-          <>
-            <SearchInput value={searchQuery} onChange={onSearchChange} />
-            <SortButton sortAsc={sortAsc} onToggle={onSortToggle} />
-          </>
-        )}
+        <SearchInput value={searchQuery} onChange={onSearchChange} />
+        {!isEditMode && <SortButton sortAsc={sortAsc} onToggle={onSortToggle} />}
       </div>
 
       {canEdit && (
@@ -149,23 +140,23 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               <button
                 onClick={onExitEdit}
                 disabled={isSaving}
-                className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                className="text-gray-300 hover:text-gray-400 transition-colors disabled:opacity-50"
                 title="Cancel"
                 type="button"
               >
-                <CloseIcon className="w-5 h-5" />
+                <CloseIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={onSave}
                 disabled={isSaving}
-                className={`transition-colors ${isSaving ? 'text-gray-300' : 'text-gray-400 hover:text-orange-500'}`}
+                className={`transition-colors ${isSaving ? 'text-gray-300' : 'text-gray-300 hover:text-orange-500'}`}
                 title={isSaving ? 'Saving...' : 'Save'}
                 type="button"
               >
                 {isSaving ? (
-                  <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-500 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-500 rounded-full animate-spin" />
                 ) : (
-                  <CheckIcon className="w-5 h-5" />
+                  <CheckIcon className="w-4 h-4" />
                 )}
               </button>
             </>
@@ -174,11 +165,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           ) : (
             <button
               onClick={onEnterEdit}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-300 hover:text-gray-400 transition-colors"
               title="Edit"
               type="button"
             >
-              <PencilIcon className="w-5 h-5" />
+              <PencilIcon className="w-4 h-4" />
             </button>
           )}
         </div>
