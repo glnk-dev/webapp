@@ -113,7 +113,7 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
   const hasVariables = variables.length > 0;
 
   return (
-    <div className="flex items-center justify-between gap-4 py-5 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+    <div className="flex items-center justify-between gap-4 py-3 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
       <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
         <div className="sm:w-56 flex-shrink-0 font-mono text-xs sm:text-sm text-gray-900 flex items-center flex-wrap gap-1">
           {hasVariables ? (

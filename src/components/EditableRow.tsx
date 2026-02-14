@@ -16,7 +16,7 @@ export const EditableRow: React.FC<EditableRowProps> = ({
   onUpdate,
   onDelete,
 }) => (
-  <div className="flex items-start justify-between gap-4 py-5 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+  <div className="flex items-start justify-between gap-4 py-3 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
     <div className="flex-1 min-w-0 flex flex-col sm:flex-row gap-3">
       <input
         type="text"
