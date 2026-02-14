@@ -6,10 +6,7 @@ import { MismatchAlert } from '../components/MismatchAlert';
 import { EditableRow } from '../components/EditableRow';
 import { EditControls } from '../components/EditControls';
 import { LoginOverlay } from '../components/LoginOverlay';
-import { PencilIcon } from '../components/icons/PencilIcon';
-import { CheckIcon } from '../components/icons/CheckIcon';
-import { CloseIcon } from '../components/icons/CloseIcon';
-import { ExclamationTriangleIcon } from '../components/icons/ExclamationTriangleIcon';
+import { TableHeader } from '../components/TableHeader';
 import { DeployingBanner } from '../components/DeployingBanner';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
@@ -23,8 +20,24 @@ interface EditableLink {
   redirectLink: string;
 }
 
+type LinkEntry = { subpath: string; redirectLink: string };
+
 const DEPLOY_AD_KEY = 'glnk_deploy_ad_until';
-const DEPLOY_DURATION = 5 * 60 * 1000; // 5 minutes
+const DEPLOY_DURATION_MS = 5 * 60 * 1000;
+
+function getDeploySecondsLeft(): number {
+  const stored = localStorage.getItem(DEPLOY_AD_KEY);
+  if (!stored) return 0;
+  return Math.max(0, Math.ceil((parseInt(stored, 10) - Date.now()) / 1000));
+}
+
+function isDeployActive(): boolean {
+  return getDeploySecondsLeft() > 0;
+}
+
+function clearDeploy() {
+  localStorage.removeItem(DEPLOY_AD_KEY);
+}
 
 const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const glnkUsername = getGlnkUsername();
@@ -40,22 +53,37 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableLinks, setEditableLinks] = useState<EditableLink[]>([]);
-  const [savedLinks, setSavedLinks] = useState<{ subpath: string; redirectLink: string }[] | null>(null);
+  const [savedLinks, setSavedLinks] = useState<LinkEntry[] | null>(null);
   const [editLockWarningShown, setEditLockWarningShown] = useState(false);
-  
-  const [showDeployAd, setShowDeployAd] = useState(() => {
-    const stored = localStorage.getItem(DEPLOY_AD_KEY);
-    if (stored) {
-      const expiresAt = parseInt(stored, 10);
-      return Date.now() < expiresAt;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortAsc, setSortAsc] = useState<boolean | null>(null);
+  const [showDeployAd, setShowDeployAd] = useState(isDeployActive);
+
+  const links = useMemo<LinkEntry[]>(
+    () => Object.entries(redirectMap).map(([subpath, redirectLink]) => ({ subpath, redirectLink })),
+    [redirectMap]
+  );
+
+  const filterByQuery = useCallback(<T extends { subpath: string; redirectLink: string }>(items: T[]): T[] => {
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter((l) => l.subpath.toLowerCase().includes(q) || l.redirectLink.toLowerCase().includes(q));
+  }, [searchQuery]);
+
+  const displayLinks = useMemo(() => {
+    let result = filterByQuery(savedLinks || links);
+    if (sortAsc !== null) {
+      result = [...result].sort((a, b) =>
+        sortAsc ? a.subpath.localeCompare(b.subpath) : b.subpath.localeCompare(a.subpath)
+      );
     }
-    return false;
-  });
+    return result;
+  }, [savedLinks, links, filterByQuery, sortAsc]);
 
-  const showLoginOverlay = privateMode && !isAuthenticated;
+  const filteredEditableLinks = useMemo(() => filterByQuery(editableLinks), [filterByQuery, editableLinks]);
 
-  const links = useMemo(
-    () => Object.entries(redirectMap).map(([key, value]) => ({ subpath: key, redirectLink: value })),
+  const toEditableLinks = useCallback(
+    () => Object.entries(redirectMap).map(([subpath, redirectLink], i) => ({ id: `link-${i}`, subpath, redirectLink })),
     [redirectMap]
   );
 
@@ -68,10 +96,14 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
     });
   }, [isEditMode, editableLinks, links]);
 
-  const toEditableLinks = useCallback(
-    () => Object.entries(redirectMap).map(([key, value], i) => ({ id: `link-${i}`, subpath: key, redirectLink: value })),
-    [redirectMap]
-  );
+  const bannerInitialSeconds = useMemo(() => (showDeployAd ? getDeploySecondsLeft() : 300), [showDeployAd]);
+
+  const invalidateAndReset = useCallback(() => {
+    clearDeploy();
+    setShowDeployAd(false);
+    setSavedLinks(null);
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
+  }, [queryClient]);
 
   useEffect(() => {
     if (loginError === 'username_mismatch') setShowMismatchMessage(true);
@@ -86,57 +118,31 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
+      if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; }
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasUnsavedChanges]);
 
-  useEffect(() => {
-    setEditableLinks(toEditableLinks());
-  }, [toEditableLinks]);
+  useEffect(() => { setEditableLinks(toEditableLinks()); }, [toEditableLinks]);
 
   useEffect(() => {
     if (!editLockWarningShown) return;
-    const handleClick = () => setEditLockWarningShown(false);
-    const timer = setTimeout(() => {
-      document.addEventListener('click', handleClick, { once: true });
-    }, 100);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleClick);
-    };
+    const dismiss = () => setEditLockWarningShown(false);
+    const timer = setTimeout(() => document.addEventListener('click', dismiss, { once: true }), 100);
+    return () => { clearTimeout(timer); document.removeEventListener('click', dismiss); };
   }, [editLockWarningShown]);
 
   useEffect(() => {
-    const checkExpiry = () => {
-      const stored = localStorage.getItem(DEPLOY_AD_KEY);
-      if (stored) {
-        const expiresAt = parseInt(stored, 10);
-        if (Date.now() >= expiresAt) {
-          localStorage.removeItem(DEPLOY_AD_KEY);
-          setShowDeployAd(false);
-          setSavedLinks(null);
-          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
-        }
-      }
-    };
-    
-    checkExpiry();
-    const interval = setInterval(checkExpiry, 1000);
-    return () => clearInterval(interval);
-  }, [queryClient]);
+    const check = () => { if (!isDeployActive()) invalidateAndReset(); };
+    check();
+    const id = setInterval(check, 1000);
+    return () => clearInterval(id);
+  }, [invalidateAndReset]);
 
   const handleLogin = useCallback(async () => {
     setIsSigningIn(true);
-    try {
-      await login();
-    } finally {
-      setIsSigningIn(false);
-    }
+    try { await login(); } finally { setIsSigningIn(false); }
   }, [login]);
 
   const handleEnterEditMode = useCallback(() => {
@@ -146,11 +152,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, []);
 
   const handleExitEditMode = useCallback(() => {
-    if (hasUnsavedChanges) {
-      if (!window.confirm('Are you sure you want to discard your changes?')) {
-        return;
-      }
-    }
+    if (hasUnsavedChanges && !window.confirm('Are you sure you want to discard your changes?')) return;
     setIsEditMode(false);
     setEditableLinks(toEditableLinks());
   }, [toEditableLinks, hasUnsavedChanges]);
@@ -160,48 +162,32 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   }, []);
 
   const handleDeleteLink = useCallback((id: string) => {
-    setEditableLinks((prev) => prev.filter((link) => link.id !== id));
+    setEditableLinks((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
   const handleUpdateLink = useCallback((id: string, field: 'subpath' | 'redirectLink', value: string) => {
-    setEditableLinks((prev) => prev.map((link) => (link.id === id ? { ...link, [field]: value } : link)));
+    setEditableLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   }, []);
 
   const handleSaveChanges = useCallback(async () => {
-    if (!hasUnsavedChanges) {
-      setIsEditMode(false);
-      return;
-    }
+    if (!hasUnsavedChanges) { setIsEditMode(false); return; }
+    if (!updateLinks) { setSaveError('Edit functionality is not available'); return; }
 
-    if (!updateLinks) {
-      setSaveError('Edit functionality is not available');
-      return;
+    const trimmed = editableLinks.map((l) => ({ subpath: l.subpath.trim(), redirectLink: l.redirectLink.trim() }));
+    if (trimmed.some((l) => !l.subpath || !l.redirectLink)) {
+      setSaveError('All links must have both subpath and redirect URL'); return;
     }
-
-    const emptyLinks = editableLinks.filter((l) => !l.subpath.trim() || !l.redirectLink.trim());
-    if (emptyLinks.length > 0) {
-      setSaveError('All links must have both subpath and redirect URL');
-      return;
-    }
-
-    const subpaths = editableLinks.map((l) => l.subpath.trim());
-    if (subpaths.length !== new Set(subpaths).size) {
-      setSaveError('Duplicate subpaths are not allowed');
-      return;
+    if (new Set(trimmed.map((l) => l.subpath)).size !== trimmed.length) {
+      setSaveError('Duplicate subpaths are not allowed'); return;
     }
 
     setIsSaving(true);
     setSaveError(null);
-
     try {
-      await updateLinks({
-        username: glnkUsername,
-        links: editableLinks.map((l) => ({ subpath: l.subpath.trim(), redirectLink: l.redirectLink.trim() })),
-      });
-      setSavedLinks(editableLinks.map((l) => ({ subpath: l.subpath.trim(), redirectLink: l.redirectLink.trim() })));
+      await updateLinks({ username: glnkUsername, links: trimmed });
+      setSavedLinks(trimmed);
       setIsEditMode(false);
-      const expiresAt = Date.now() + DEPLOY_DURATION;
-      localStorage.setItem(DEPLOY_AD_KEY, expiresAt.toString());
+      localStorage.setItem(DEPLOY_AD_KEY, (Date.now() + DEPLOY_DURATION_MS).toString());
       setShowDeployAd(true);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Failed to save changes');
@@ -210,25 +196,16 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
     }
   }, [editableLinks, glnkUsername, hasUnsavedChanges]);
 
-  const handleBannerComplete = useCallback(() => {
-    localStorage.removeItem(DEPLOY_AD_KEY);
-    setShowDeployAd(false);
-    setSavedLinks(null);
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.URL_MAP] });
-  }, [queryClient]);
-
-  const DEPLOY_COUNTDOWN_SECONDS = 300; // 5 minutes
-
-  const bannerInitialSeconds = useMemo(() => {
-    if (showDeployAd) {
-      const stored = localStorage.getItem(DEPLOY_AD_KEY);
-      if (stored) {
-        const expiresAt = parseInt(stored, 10);
-        return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
-      }
+  const handleToggleDeployWarning = useCallback(() => {
+    if (editLockWarningShown) {
+      setEditLockWarningShown(false);
+      handleEnterEditMode();
+    } else {
+      setEditLockWarningShown(true);
     }
-    return DEPLOY_COUNTDOWN_SECONDS;
-  }, [showDeployAd]);
+  }, [editLockWarningShown, handleEnterEditMode]);
+
+  const hasLinks = isEditMode || (savedLinks || links).length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -252,9 +229,9 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         {showDeployAd && glnkUsername && (
           <div className="mb-6 -mx-6 sm:-mx-8">
             <div className="mx-6 sm:mx-8">
-              <DeployingBanner 
-                username={glnkUsername} 
-                onComplete={handleBannerComplete}
+              <DeployingBanner
+                username={glnkUsername}
+                onComplete={invalidateAndReset}
                 initialSeconds={bannerInitialSeconds}
                 variant="inline"
               />
@@ -262,109 +239,49 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
           </div>
         )}
 
-        {isEditMode || (savedLinks || links).length > 0 ? (
+        {hasLinks ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between py-4 px-4 sm:px-6 border-b border-gray-100">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-                <span className="hidden sm:inline">Subpath / Redirect Link</span>
-                <span className="sm:hidden">Links</span>
-              </span>
-              {isAuthenticated && !staticMode && (
-                <div className="flex items-center gap-3">
-                  {isEditMode ? (
-                    <>
-                      <button
-                        onClick={handleExitEditMode}
-                        disabled={isSaving}
-                        className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                        title="Cancel"
-                        type="button"
-                      >
-                        <CloseIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={handleSaveChanges}
-                        disabled={isSaving}
-                        className={`transition-colors ${isSaving ? 'text-gray-300' : 'text-gray-400 hover:text-orange-500'}`}
-                        title={isSaving ? 'Saving...' : 'Save'}
-                        type="button"
-                      >
-                        {isSaving ? (
-                          <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-500 rounded-full animate-spin" />
-                        ) : (
-                          <CheckIcon className="w-5 h-5" />
-                        )}
-                      </button>
-                    </>
-                  ) : showDeployAd ? (
-                    <div className="relative">
-                      <button
-                        onClick={() => {
-                          if (editLockWarningShown) {
-                            setEditLockWarningShown(false);
-                            handleEnterEditMode();
-                          } else {
-                            setEditLockWarningShown(true);
-                          }
-                        }}
-                        className={`transition-colors ${
-                          editLockWarningShown 
-                            ? 'text-orange-500 hover:text-orange-600' 
-                            : 'text-gray-300 hover:text-gray-400'
-                        }`}
-                        title={editLockWarningShown ? "Click again to edit anyway" : "Editing locked during deployment"}
-                        type="button"
-                      >
-                        <PencilIcon className="w-5 h-5" />
-                      </button>
-                      {editLockWarningShown && (
-                        <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-amber-50 border border-amber-200 rounded-xl shadow-lg z-10">
-                          <div className="flex items-start gap-2">
-                            <ExclamationTriangleIcon className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                              <p className="text-xs text-amber-800 font-medium mb-1.5">Deployment in progress</p>
-                              <p className="text-[10px] text-amber-700 leading-relaxed">Editing now may cause conflicts. Click the edit button again if you still want to proceed.</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleEnterEditMode}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      title="Edit"
-                      type="button"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            <TableHeader
+              isEditMode={isEditMode}
+              isSaving={isSaving}
+              isAuthenticated={isAuthenticated}
+              staticMode={staticMode}
+              showDeployAd={showDeployAd}
+              editLockWarningShown={editLockWarningShown}
+              searchQuery={searchQuery}
+              sortAsc={sortAsc}
+              onSearchChange={setSearchQuery}
+              onSortToggle={() => setSortAsc((p) => p === null ? true : p ? false : null)}
+              onEnterEdit={handleEnterEditMode}
+              onExitEdit={handleExitEditMode}
+              onSave={handleSaveChanges}
+              onToggleDeployWarning={handleToggleDeployWarning}
+            />
             <div>
               {isEditMode
-                ? editableLinks.map((link) => (
-                    <EditableRow
-                      key={link.id}
-                      id={link.id}
-                      subpath={link.subpath}
-                      redirectLink={link.redirectLink}
-                      onUpdate={handleUpdateLink}
-                      onDelete={handleDeleteLink}
-                    />
-                  ))
-                : (savedLinks || links).map(({ subpath, redirectLink }) => (
-                    <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />
-                  ))}
+                ? filteredEditableLinks.length > 0
+                  ? filteredEditableLinks.map((link) => (
+                      <EditableRow
+                        key={link.id}
+                        id={link.id}
+                        subpath={link.subpath}
+                        redirectLink={link.redirectLink}
+                        onUpdate={handleUpdateLink}
+                        onDelete={handleDeleteLink}
+                      />
+                    ))
+                  : searchQuery
+                    ? <div className="py-8 text-center text-sm text-gray-400">No links matching "{searchQuery}"</div>
+                    : null
+                : displayLinks.length > 0
+                  ? displayLinks.map(({ subpath, redirectLink }) => (
+                      <URLGenerator key={subpath} subpath={subpath} template={redirectLink} />
+                    ))
+                  : searchQuery
+                    ? <div className="py-8 text-center text-sm text-gray-400">No links matching "{searchQuery}"</div>
+                    : null}
             </div>
-            {isEditMode && (
-              <EditControls
-                error={saveError}
-                isSaving={isSaving}
-                onAdd={handleAddLink}
-              />
-            )}
+            {isEditMode && <EditControls error={saveError} isSaving={isSaving} onAdd={handleAddLink} />}
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
@@ -373,7 +290,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         )}
       </main>
 
-      {showLoginOverlay && <LoginOverlay onLogin={login} />}
+      {privateMode && !isAuthenticated && <LoginOverlay onLogin={login} />}
     </div>
   );
 };

@@ -21,7 +21,7 @@ const InlineInput: React.FC<{
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
       style={{ width }}
-      className="inline-block text-center text-gray-700 placeholder:text-gray-400 bg-gray-100 hover:bg-gray-200 focus:bg-white focus:ring-2 focus:ring-orange-200 rounded-full px-2 py-0.5 text-xs sm:text-sm font-mono focus:outline-none transition-all duration-200"
+      className="inline-block text-center text-gray-500 placeholder:text-gray-300 bg-gray-50 border border-gray-200 hover:border-gray-300 focus:bg-white focus:border-orange-300 rounded-full px-1.5 sm:px-2 py-px sm:py-0.5 text-xs font-mono focus:outline-none transition-colors"
     />
   );
 };
@@ -112,29 +112,47 @@ export const URLGenerator: React.FC<URLGeneratorProps> = ({ subpath, template })
 
   const hasVariables = variables.length > 0;
 
+  const handleSubpathClick = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).tagName === 'INPUT') return;
+    window.location.href = `${publicUrl}${generatedSubpath}`;
+  }, [publicUrl, generatedSubpath]);
+
+  const handleUrlClick = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).tagName === 'INPUT') return;
+    window.open(generatedUrl, '_blank');
+  }, [generatedUrl]);
+
   return (
-    <div className="flex items-center justify-between gap-4 py-5 px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
-      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-        <div className="sm:w-56 flex-shrink-0 font-mono text-xs sm:text-sm text-gray-900 flex items-center flex-wrap gap-1">
+    <div className={`flex items-center justify-between gap-3 sm:gap-4 ${hasVariables ? 'py-3.5 sm:py-4' : 'py-3.5 sm:py-4'} px-4 sm:px-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors group`}>
+      <div className={`flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center ${hasVariables ? 'gap-1.5 sm:gap-4' : 'gap-1 sm:gap-4'}`}>
+        <div
+          className={`sm:w-56 flex-shrink-0 text-sm text-gray-900 flex items-center overflow-x-auto whitespace-nowrap gap-0.5 sm:gap-1 scrollbar-none ${hasVariables ? 'cursor-pointer hover:text-orange-600' : ''}`}
+          onClick={hasVariables ? handleSubpathClick : undefined}
+          title={hasVariables ? `${publicUrl}${generatedSubpath}` : undefined}
+        >
           {hasVariables ? (
             renderWithVariables(subpath, varMap, variables, handleVarChange, handleKeyDown)
           ) : (
             <a
               href={`${publicUrl}${subpath}`}
-              className="hover:text-orange-600 transition-colors truncate"
+              className="hover:text-orange-600 transition-colors"
               title={`${publicUrl}${subpath}`}
             >
               {subpath}
             </a>
           )}
         </div>
-        <div className="flex-1 text-xs sm:text-sm text-gray-500 flex items-center flex-wrap gap-1 min-w-0">
+        <div
+          className={`flex-1 text-xs text-gray-400 font-light flex items-center overflow-x-auto whitespace-nowrap gap-0.5 sm:gap-1 min-w-0 scrollbar-none ${hasVariables ? 'cursor-pointer hover:text-gray-600' : ''}`}
+          onClick={hasVariables ? handleUrlClick : undefined}
+          title={hasVariables ? generatedUrl : undefined}
+        >
           {hasVariables ? (
             renderWithVariables(template, varMap, variables, handleVarChange, handleKeyDown)
           ) : (
             <a
               href={template}
-              className="hover:text-gray-900 transition-colors truncate block"
+              className="hover:text-gray-600 transition-colors"
               title={template}
             >
               {template}
