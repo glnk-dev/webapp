@@ -95,12 +95,12 @@ runs:
         FIREBASE_APP_ID: ${{ steps.secrets.outputs.firebase_app_id }}
 
     - name: Install Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: 18.x
 
     - name: Cache NPM packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -118,10 +118,10 @@ runs:
         GLNK_PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v7
       with:
         path: build
 
     - name: Deploy to GitHub pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
