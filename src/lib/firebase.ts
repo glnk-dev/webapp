@@ -41,6 +41,10 @@ export const updateLinks = functions
   ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'update_links')
   : null;
 
+export const getTotpStatus = functions
+  ? httpsCallable<{ username: string }, { enabled: boolean }>(functions, 'get_totp_status')
+  : null;
+
 export const setupTotp = functions
   ? httpsCallable<{ username: string }, { uri: string; recovery_codes: string[] }>(functions, 'setup_totp')
   : null;

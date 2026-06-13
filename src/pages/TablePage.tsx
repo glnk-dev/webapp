@@ -8,6 +8,8 @@ import { EditControls } from '../components/EditControls';
 import { LoginOverlay } from '../components/LoginOverlay';
 import { TableHeader } from '../components/TableHeader';
 import { DeployingBanner } from '../components/DeployingBanner';
+import { TotpSetupModal } from '../components/TotpSetupModal';
+import { EnterCodeModal } from '../components/EnterCodeModal';
 import { useAuth } from '../contexts/AuthContext';
 import { updateLinks } from '../lib/firebase';
 import { TablePageProps } from '../types';
@@ -48,6 +50,9 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const queryClient = useQueryClient();
 
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isTotpModalOpen, setIsTotpModalOpen] = useState(false);
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+  const isOauthSession = isAuthenticated && !user?.uid?.startsWith('totp-');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showMismatchMessage, setShowMismatchMessage] = useState(true);
@@ -219,6 +224,8 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         hasUnsavedChanges={hasUnsavedChanges}
         onLogin={handleLogin}
         onLogout={logout}
+        onOpenTotp={isOauthSession ? () => setIsTotpModalOpen(true) : undefined}
+        onOpenCode={!isAuthenticated && !staticMode ? () => setIsCodeModalOpen(true) : undefined}
       />
 
       <main className="flex-1 max-w-6xl mx-auto px-6 sm:px-8 py-8 w-full" style={{ paddingTop: '96px' }}>
@@ -290,7 +297,13 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         )}
       </main>
 
-      {privateMode && !isAuthenticated && <LoginOverlay onLogin={loginWithGithub} />}
+      {privateMode && !isAuthenticated && (
+        <LoginOverlay onLogin={loginWithGithub} onOpenCode={() => setIsCodeModalOpen(true)} />
+      )}
+      {isTotpModalOpen && (
+        <TotpSetupModal username={glnkUsername} onClose={() => setIsTotpModalOpen(false)} />
+      )}
+      {isCodeModalOpen && <EnterCodeModal onClose={() => setIsCodeModalOpen(false)} />}
     </div>
   );
 };

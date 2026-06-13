@@ -5,9 +5,10 @@ import { getGlnkUsername } from '../utils/env';
 
 interface LoginOverlayProps {
   onLogin: () => Promise<void>;
+  onOpenCode?: () => void;
 }
 
-export const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin }) => {
+export const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onOpenCode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const glnkUsername = getGlnkUsername();
 
@@ -46,7 +47,17 @@ export const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin }) => {
             <GithubIcon className="w-5 h-5" />
             <span>{isLoading ? 'Signing in...' : 'Continue with GitHub'}</span>
           </button>
-          
+
+          {onOpenCode && (
+            <button
+              onClick={onOpenCode}
+              type="button"
+              className="mt-3 w-full text-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              Use authenticator code
+            </button>
+          )}
+
           <p className="mt-6 text-center text-xs text-gray-400">
             Only the owner of this site can sign in
           </p>

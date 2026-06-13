@@ -1,6 +1,8 @@
 import React from 'react';
 import { GithubIcon } from './icons/GithubIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
+import { ShieldIcon } from './icons/ShieldIcon';
+import { KeyIcon } from './icons/KeyIcon';
 import { User } from '../types';
 
 interface NavBarProps {
@@ -13,6 +15,8 @@ interface NavBarProps {
   hasUnsavedChanges: boolean;
   onLogin: () => void;
   onLogout: () => void;
+  onOpenTotp?: () => void;
+  onOpenCode?: () => void;
   topOffset?: number;
 }
 
@@ -26,6 +30,8 @@ export const NavBar: React.FC<NavBarProps> = ({
   hasUnsavedChanges,
   onLogin,
   onLogout,
+  onOpenTotp,
+  onOpenCode,
   topOffset = 0,
 }) => {
   const handleLogout = () => {
@@ -73,13 +79,23 @@ export const NavBar: React.FC<NavBarProps> = ({
                 {user.photoURL && (
                   <img
                     src={user.photoURL}
-                    alt={user.displayName || user.email || 'User'}
-                    className="w-7 h-7 rounded-full"
+                    alt={user.displayName || username}
+                    className="w-5 h-5 sm:w-7 sm:h-7 rounded-full"
                   />
                 )}
                 <span className="hidden sm:inline text-sm font-medium text-gray-700 max-w-[150px] truncate">
-                  {user.displayName || user.email || 'User'}
+                  {user.displayName || username}
                 </span>
+                {onOpenTotp && (
+                  <button
+                    onClick={onOpenTotp}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Two-factor authentication"
+                    type="button"
+                  >
+                    <ShieldIcon />
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -90,15 +106,29 @@ export const NavBar: React.FC<NavBarProps> = ({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={onLogin}
-                disabled={isSigningIn}
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
-                type="button"
-              >
-                <GithubIcon className="w-5 h-5" />
-                <span>{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
-              </button>
+              <div className="flex items-center gap-3">
+                {onOpenCode && (
+                  <button
+                    onClick={onOpenCode}
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors whitespace-nowrap"
+                    type="button"
+                    title="Use authenticator code"
+                  >
+                    <KeyIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Use code</span>
+                  </button>
+                )}
+                <button
+                  onClick={onLogin}
+                  disabled={isSigningIn}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  type="button"
+                  title="Sign in with GitHub"
+                >
+                  <GithubIcon className="w-5 h-5" />
+                  <span className="hidden sm:inline">{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
+                </button>
+              </div>
             )
           )}
         </div>
