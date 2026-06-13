@@ -139,7 +139,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const { data } = await verifyTotp({ username: siteOwner, code });
-      await signInWithCustomToken(auth, data.token);
+      const result = await signInWithCustomToken(auth, data.token);
+      setUser(toUser(result.user));
     } catch (error: unknown) {
       const errCode = (error as { code?: string }).code;
       setLoginError(errCode === 'functions/permission-denied' ? 'totp_invalid' : 'totp_failed');
