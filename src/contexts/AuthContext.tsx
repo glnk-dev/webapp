@@ -4,9 +4,10 @@ import {
   onAuthStateChanged,
   signOut,
   signInWithPopup,
+  signInWithCustomToken,
   GithubAuthProvider,
 } from 'firebase/auth';
-import { auth, githubProvider } from '../lib/firebase';
+import { auth, githubProvider, verifyTotp } from '../lib/firebase';
 import { User } from '../types';
 import { getGlnkUsername, isStatic, isHomepage } from '../utils/env';
 
@@ -16,7 +17,8 @@ interface AuthContextType {
   isLoading: boolean;
   loginError: string | null;
   githubLogin: string | null;
-  login: () => Promise<void>;
+  loginWithGithub: () => Promise<void>;
+  loginWithTotp: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -41,7 +43,7 @@ const toUser = (firebaseUser: FirebaseUser | null): User | null => {
   };
 };
 
-const fetchGitHubLogin = async (accessToken: string): Promise<string | null> => {
+const fetchGithubLogin = async (accessToken: string): Promise<string | null> => {
   const response = await fetch('https://api.github.com/user', {
     headers: {
       Authorization: `token ${accessToken}`,
@@ -86,7 +88,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, [staticMode]);
 
-  const login = useCallback(async () => {
+  const loginWithGithub = useCallback(async () => {
     if (!auth || !githubProvider) throw new Error('Firebase not configured');
 
     setLoginError(null);
@@ -101,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Failed to get access token');
       }
 
-      const ghLogin = await fetchGitHubLogin(accessToken);
+      const ghLogin = await fetchGithubLogin(accessToken);
 
       if (homepageMode) {
         if (ghLogin) {
@@ -129,6 +131,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [siteOwner, loginError, homepageMode]);
 
+  const loginWithTotp = useCallback(async (code: string) => {
+    if (!auth || !verifyTotp) throw new Error('Firebase not configured');
+
+    setLoginError(null);
+    isValidating.current = true;
+
+    try {
+      const { data } = await verifyTotp({ username: siteOwner, code });
+      await signInWithCustomToken(auth, data.token);
+    } catch (error: unknown) {
+      const errCode = (error as { code?: string }).code;
+      setLoginError(errCode === 'functions/permission-denied' ? 'totp_invalid' : 'totp_failed');
+      throw error;
+    } finally {
+      isValidating.current = false;
+    }
+  }, [siteOwner]);
+
   const logout = useCallback(async () => {
     if (auth) await signOut(auth);
     localStorage.removeItem(GITHUB_LOGIN_KEY);
@@ -151,7 +171,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         loginError,
         githubLogin,
-        login,
+        loginWithGithub,
+        loginWithTotp,
         logout,
       }}
     >

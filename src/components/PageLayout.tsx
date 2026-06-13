@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { GitHubIcon } from './icons/GitHubIcon';
+import { GithubIcon } from './icons/GithubIcon';
 import { XIcon, MailIcon } from './icons/FeatureIcons';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,7 +9,7 @@ interface PageLayoutProps {
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
-  const { login, isAuthenticated, user, logout } = useAuth();
+  const { loginWithGithub, isAuthenticated, user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -36,10 +36,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             ) : (
               <button
                 type="button"
-                onClick={login}
+                onClick={loginWithGithub}
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
               >
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
                 <span>Sign in</span>
               </button>
             )}
@@ -67,7 +67,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             </div>
             <div className="flex items-center gap-5 text-gray-400">
               <a href="https://github.com/glnk-dev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="GitHub">
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
               </a>
               <a href="https://x.com/GlnkDev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="@GlnkDev">
                 <XIcon className="w-5 h-5" />

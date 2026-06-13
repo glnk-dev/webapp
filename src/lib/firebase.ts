@@ -41,5 +41,21 @@ export const updateLinks = functions
   ? httpsCallable<{ username: string; links: LinkData[] }, { success: boolean; file_url: string }>(functions, 'update_links')
   : null;
 
+export const setupTotp = functions
+  ? httpsCallable<{ username: string }, { uri: string; recovery_codes: string[] }>(functions, 'setup_totp')
+  : null;
+
+export const confirmTotp = functions
+  ? httpsCallable<{ username: string; code: string }, { success: boolean }>(functions, 'confirm_totp')
+  : null;
+
+export const verifyTotp = functions
+  ? httpsCallable<{ username: string; code: string }, { token: string }>(functions, 'verify_totp')
+  : null;
+
+export const disableTotp = functions
+  ? httpsCallable<{ username: string }, { success: boolean }>(functions, 'disable_totp')
+  : null;
+
 export { auth, githubProvider };
 export default app;
