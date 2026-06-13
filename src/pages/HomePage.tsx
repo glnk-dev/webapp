@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { GitHubIcon } from '../components/icons/GitHubIcon';
+import { GithubIcon } from '../components/icons/GithubIcon';
 import { ExternalLinkIcon } from '../components/icons/ExternalLinkIcon';
 import {
   LinkIcon,
@@ -83,7 +83,7 @@ const SIGNUP_BANNER_DURATION = 5 * 60 * 1000; // 5 minutes
 const SIGNUP_COUNTDOWN_SECONDS = 300; // 5 minutes
 
 const HomePage: React.FC = () => {
-  const { login, isAuthenticated, user, githubLogin, logout } = useAuth();
+  const { loginWithGithub, isAuthenticated, user, githubLogin, logout } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -140,14 +140,14 @@ const HomePage: React.FC = () => {
     setShowBanner(false);
   }, []);
 
-  const handleGitHubLogin = useCallback(async () => {
+  const handleGithubLogin = useCallback(async () => {
     setIsLoggingIn(true);
     try {
-      await login();
+      await loginWithGithub();
     } finally {
       setIsLoggingIn(false);
     }
-  }, [login]);
+  }, [loginWithGithub]);
 
   const handleSignup = useCallback(async () => {
     if (!githubLogin || !requestSignup) return;
@@ -202,11 +202,11 @@ const HomePage: React.FC = () => {
             ) : (
               <button
                 type="button"
-                onClick={handleGitHubLogin}
+                onClick={handleGithubLogin}
                 disabled={isLoggingIn}
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
               >
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
                 <span>{isLoggingIn ? 'Signing in...' : 'Sign in'}</span>
               </button>
             )}
@@ -292,11 +292,11 @@ const HomePage: React.FC = () => {
             ) : (
               <button
                 type="button"
-                onClick={handleGitHubLogin}
+                onClick={handleGithubLogin}
                 disabled={isLoggingIn}
                 className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-semibold rounded-xl transition-colors shadow-lg"
               >
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
                 {isLoggingIn ? 'Signing in...' : 'Get started with GitHub'}
               </button>
             )}
@@ -458,7 +458,7 @@ const HomePage: React.FC = () => {
             </div>
             <div className="flex items-center gap-5 text-gray-400">
               <a href="https://github.com/glnk-dev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="GitHub">
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
               </a>
               <a href="https://x.com/GlnkDev" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors" title="@GlnkDev">
                 <XIcon className="w-5 h-5" />

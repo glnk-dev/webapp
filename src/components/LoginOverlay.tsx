@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitHubIcon } from './icons/GitHubIcon';
+import { GithubIcon } from './icons/GithubIcon';
 import { ExternalLinkIcon } from './icons/ExternalLinkIcon';
 import { getGlnkUsername } from '../utils/env';
 
@@ -43,7 +43,7 @@ export const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin }) => {
             className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors"
             type="button"
           >
-            <GitHubIcon className="w-5 h-5" />
+            <GithubIcon className="w-5 h-5" />
             <span>{isLoading ? 'Signing in...' : 'Continue with GitHub'}</span>
           </button>
           

@@ -1,5 +1,5 @@
 import React from 'react';
-import { GitHubIcon } from './icons/GitHubIcon';
+import { GithubIcon } from './icons/GithubIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
 import { User } from '../types';
 
@@ -96,7 +96,7 @@ export const NavBar: React.FC<NavBarProps> = ({
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
                 type="button"
               >
-                <GitHubIcon className="w-5 h-5" />
+                <GithubIcon className="w-5 h-5" />
                 <span>{isSigningIn ? 'Signing in...' : 'Sign in'}</span>
               </button>
             )

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const GitHubIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+export const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
   <svg
     className={className}
     fill="currentColor"

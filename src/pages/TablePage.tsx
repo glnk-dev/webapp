@@ -44,7 +44,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
   const publicUrl = getPublicUrl();
   const privateMode = isPrivate();
   const staticMode = isStatic();
-  const { user, isAuthenticated, logout, login, loginError } = useAuth();
+  const { user, isAuthenticated, logout, loginWithGithub, loginError } = useAuth();
   const queryClient = useQueryClient();
 
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -142,8 +142,8 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
 
   const handleLogin = useCallback(async () => {
     setIsSigningIn(true);
-    try { await login(); } finally { setIsSigningIn(false); }
-  }, [login]);
+    try { await loginWithGithub(); } finally { setIsSigningIn(false); }
+  }, [loginWithGithub]);
 
   const handleEnterEditMode = useCallback(() => {
     setIsEditMode(true);
@@ -290,7 +290,7 @@ const TablePage: React.FC<TablePageProps> = ({ redirectMap }) => {
         )}
       </main>
 
-      {privateMode && !isAuthenticated && <LoginOverlay onLogin={login} />}
+      {privateMode && !isAuthenticated && <LoginOverlay onLogin={loginWithGithub} />}
     </div>
   );
 };
