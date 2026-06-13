@@ -46,7 +46,7 @@ runs:
           firebase_api_key:glnk-dev/glnk-dev-firebase-api-key
           firebase_app_id:glnk-dev/glnk-dev-firebase-app-id
 
-    - uses: actions/create-github-app-token@v2
+    - uses: actions/create-github-app-token@v3
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
       id: app-token
       with:
