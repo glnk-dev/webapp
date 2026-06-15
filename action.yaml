@@ -41,7 +41,7 @@ runs:
       uses: google-github-actions/get-secretmanager-secrets@v3
       with:
         secrets: |-
-          gh_app_id:glnk-dev/gh-app-glnk-manager-id
+          gh_app_client_id:glnk-dev/gh-app-glnk-manager-client-id
           gh_app_private_key:glnk-dev/gh-app-glnk-manager-private-key
           firebase_api_key:glnk-dev/glnk-dev-firebase-api-key
           firebase_app_id:glnk-dev/glnk-dev-firebase-app-id
@@ -50,7 +50,7 @@ runs:
       if: inputs.GLNK_ACCESS_MODE != 'homepage'
       id: app-token
       with:
-        app-id: ${{ steps.secrets.outputs.gh_app_id }}
+        client-id: ${{ steps.secrets.outputs.gh_app_client_id }}
         private-key: ${{ steps.secrets.outputs.gh_app_private_key }}
         owner: ${{ github.repository_owner }}
         repositories: community
