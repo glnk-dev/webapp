@@ -20,7 +20,12 @@ import { dirname, join } from 'node:path';
 const USERNAME = process.env.GLNK_USERNAME ?? '';
 const OUT_DIR = process.env.GLNK_OUTPUT_DIR ?? 'build';
 const YAML_PATH = process.env.GLNK_INPUT_YAML ?? join(OUT_DIR, 'glnk.yaml');
-const PUBLIC_URL = process.env.GLNK_PUBLIC_URL ?? (USERNAME ? `https://${USERNAME}.glnk.dev` : '');
+// GLNK_PUBLIC_URL is honoured only when it's a full http(s) URL — in CI it's
+// often empty (env var still set), or a Vite --base path like "/webapp/".
+const rawPublicUrl = process.env.GLNK_PUBLIC_URL ?? '';
+const PUBLIC_URL = /^https?:\/\//.test(rawPublicUrl)
+  ? rawPublicUrl
+  : USERNAME ? `https://${USERNAME}.glnk.dev` : '';
 const FAVICON_PATH = process.env.GLNK_FAVICON ?? 'public/favicon.png';
 const BRAND_CARD_PATH = process.env.GLNK_BRAND_CARD ?? 'public/assets/og.png';
 const OG_BG_PATH = process.env.GLNK_OG_BG ?? 'public/assets/og-bg.png';
