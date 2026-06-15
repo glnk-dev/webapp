@@ -87,8 +87,8 @@ function ogSvg(shortLink, destShort, path, userDomain, qrDataUri) {
   const titleLines = wrapTitle(shortLink, 30);
   const brandMark = faviconDataUri
     ? `<image href="${faviconDataUri}" x="80" y="185" width="40" height="36"/>
-       <text x="134" y="214" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">glnk.dev</text>`
-    : `<text x="80" y="214" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#f97316">glnk.dev</text>`;
+       <text x="134" y="214" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#0f172a">${escapeXml(userDomain)}</text>`
+    : `<text x="80" y="214" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#f97316">${escapeXml(userDomain)}</text>`;
 
   // Smaller white QR card positioned more centrally on the right to keep wave corners visible
   const cardX = 770, cardY = 145, cardSize = 340;
@@ -129,20 +129,13 @@ function ogSvg(shortLink, destShort, path, userDomain, qrDataUri) {
   <!-- Brand mark top-left -->
   ${brandMark}
 
-  <!-- Big title (short link) — split domain vs path for color accent -->
-  ${(() => {
-    const slashIdx = shortLink.indexOf('/');
-    const domain = slashIdx >= 0 ? shortLink.slice(0, slashIdx) : shortLink;
-    const pathPart = slashIdx >= 0 ? shortLink.slice(slashIdx) : '';
-    return `<text x="80" y="290" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="56" font-weight="700">
-      <tspan fill="#0f172a">${escapeXml(domain)}</tspan><tspan fill="#f97316">${escapeXml(pathPart)}</tspan>
-    </text>`;
-  })()}
+  <!-- Big title: just the /path (hostname lives in the brand row above) -->
+  <text x="80" y="290" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="56" font-weight="700" fill="#f97316">${escapeXml(path)}</text>
 
   <!-- Tagline label -->
   <text x="80" y="355" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="20" fill="#94a3b8">Redirects to</text>
   <!-- Destination (wraps to up to 3 lines) -->
-  ${destLines.map((line, i) => `<text x="80" y="${390 + i * 30}" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="22" font-weight="400" fill="#0f172a">${escapeXml(line)}</text>`).join('\n  ')}
+  ${destLines.map((line, i) => `<text x="80" y="${390 + i * 30}" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#0f172a">${escapeXml(line)}</text>`).join('\n  ')}
 
 
   <!-- Right-side QR card -->
