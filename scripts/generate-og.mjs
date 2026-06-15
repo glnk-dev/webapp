@@ -134,15 +134,15 @@ function ogSvg(shortLink, destShort, path, userDomain, qrDataUri) {
     const slashIdx = shortLink.indexOf('/');
     const domain = slashIdx >= 0 ? shortLink.slice(0, slashIdx) : shortLink;
     const pathPart = slashIdx >= 0 ? shortLink.slice(slashIdx) : '';
-    return `<text x="80" y="315" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="56" font-weight="700">
+    return `<text x="80" y="290" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="56" font-weight="700">
       <tspan fill="#0f172a">${escapeXml(domain)}</tspan><tspan fill="#f97316">${escapeXml(pathPart)}</tspan>
     </text>`;
   })()}
 
   <!-- Tagline label -->
-  <text x="80" y="385" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="20" fill="#94a3b8">Redirects to</text>
+  <text x="80" y="355" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="20" fill="#94a3b8">Redirects to</text>
   <!-- Destination (wraps to up to 3 lines) -->
-  ${destLines.map((line, i) => `<text x="80" y="${420 + i * 30}" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#0f172a">${escapeXml(line)}</text>`).join('\n  ')}
+  ${destLines.map((line, i) => `<text x="80" y="${390 + i * 30}" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="22" font-weight="400" fill="#0f172a">${escapeXml(line)}</text>`).join('\n  ')}
 
 
   <!-- Right-side QR card -->
