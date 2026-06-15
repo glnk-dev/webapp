@@ -117,6 +117,15 @@ runs:
       env:
         GLNK_PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
 
+    - name: Generate per-link OG cards + stubs
+      if: inputs.GLNK_ACCESS_MODE != 'homepage'
+      shell: bash
+      run: node scripts/generate-og.mjs
+      env:
+        GLNK_USERNAME: ${{ inputs.GLNK_USERNAME }}
+        GLNK_OUTPUT_DIR: build
+        GLNK_PUBLIC_URL: ${{ inputs.GLNK_PUBLIC_URL }}
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v5
       with:
