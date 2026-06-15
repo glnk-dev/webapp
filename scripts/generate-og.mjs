@@ -148,25 +148,56 @@ function ogSvg(shortLink, destShort, path, userDomain, qrDataUri) {
 </svg>`;
 }
 
-function stubHtml({ path, ogImage, title, description, destination }) {
+// Mirrors the meta-tag shape of webapp/index.html (site root) so per-link
+// pages are unified with the homepage: og:type/site_name/locale, full
+// og:image set, full twitter:* set, canonical, etc.
+function stubHtml({ path, ogImage, shortLink, destination, pageUrl }) {
+  const destShort = stripProto(destination);
+  const title = `${shortLink} · ${truncate(destShort, 48)}`;
+  const description = `Short link ${shortLink} redirects to ${destShort} — managed via glnk.dev.`;
+  const imageAlt = `${shortLink} → ${destShort}`;
   return `<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8">
-<title>${escapeXml(title)}</title>
-<meta name="description" content="${escapeXml(description)}">
-<meta property="og:title" content="${escapeXml(title)}">
-<meta property="og:description" content="${escapeXml(description)}">
-<meta property="og:url" content="${PUBLIC_URL}${path}">
-<meta property="og:image" content="${ogImage}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="refresh" content="0;url=${escapeXml(destination)}">
-<link rel="canonical" href="${escapeXml(destination)}">
-</head><body>
-<script>window.location.replace(${JSON.stringify(destination)});</script>
-<p>Redirecting to <a href="${escapeXml(destination)}">${escapeXml(destination)}</a>...</p>
-</body></html>`;
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>${escapeXml(title)}</title>
+  <meta name="title" content="${escapeXml(title)}" />
+  <meta name="description" content="${escapeXml(description)}" />
+  <meta name="author" content="glnk.dev" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+  <link rel="canonical" href="${escapeXml(destination)}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${escapeXml(pageUrl)}" />
+  <meta property="og:title" content="${escapeXml(title)}" />
+  <meta property="og:description" content="${escapeXml(description)}" />
+  <meta property="og:image" content="${escapeXml(ogImage)}" />
+  <meta property="og:image:alt" content="${escapeXml(imageAlt)}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:site_name" content="glnk.dev" />
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="${escapeXml(pageUrl)}" />
+  <meta name="twitter:title" content="${escapeXml(title)}" />
+  <meta name="twitter:description" content="${escapeXml(description)}" />
+  <meta name="twitter:image" content="${escapeXml(ogImage)}" />
+  <meta name="twitter:image:alt" content="${escapeXml(imageAlt)}" />
+  <meta name="twitter:creator" content="@GlnkDev" />
+  <meta name="twitter:site" content="@GlnkDev" />
+
+  <meta http-equiv="refresh" content="0;url=${escapeXml(destination)}" />
+</head>
+<body>
+  <script>window.location.replace(${JSON.stringify(destination)});</script>
+  <p>Redirecting to <a href="${escapeXml(destination)}">${escapeXml(destination)}</a>...</p>
+</body>
+</html>`;
 }
 
 function writeOut(file, data) {
@@ -186,8 +217,6 @@ for await (const [path, dest] of Object.entries(routes)) {
   const s = slug(path);
   const shortLink = `${stripProto(PUBLIC_URL)}${path}`;
   const destShort = stripProto(String(dest));
-  const title = truncate(destShort, 40);
-  const description = `via ${shortLink}`;
 
   const qrDataUri = await makeQrDataUri(String(dest));
   const png = new Resvg(ogSvg(shortLink, destShort, path, stripProto(PUBLIC_URL), qrDataUri), {
@@ -206,10 +235,16 @@ for await (const [path, dest] of Object.entries(routes)) {
   writeOut(join(OUT_DIR, 'og', `${s}.png`), png);
   writeOut(
     join(OUT_DIR, path, 'index.html'),
-    stubHtml({ path, ogImage: `${PUBLIC_URL}/og/${s}.png`, title, description, destination: String(dest) }),
+    stubHtml({
+      path,
+      ogImage: `${PUBLIC_URL}/og/${s}.png`,
+      shortLink,
+      destination: String(dest),
+      pageUrl: `${PUBLIC_URL}${path}`,
+    }),
   );
 
-  console.log(`[og] ${path}  →  ${title}`);
+  console.log(`[og] ${path}  →  ${destShort}`);
   generated++;
 }
 
