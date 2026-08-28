@@ -1,8 +1,6 @@
 import React from 'react';
 import { GithubIcon } from './icons/GithubIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
-import { ShieldIcon } from './icons/ShieldIcon';
-import { KeyIcon } from './icons/KeyIcon';
 import { User } from '../types';
 
 interface NavBarProps {
@@ -15,8 +13,6 @@ interface NavBarProps {
   hasUnsavedChanges: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  onOpenTotp?: () => void;
-  onOpenCode?: () => void;
   topOffset?: number;
 }
 
@@ -30,8 +26,6 @@ export const NavBar: React.FC<NavBarProps> = ({
   hasUnsavedChanges,
   onLogin,
   onLogout,
-  onOpenTotp,
-  onOpenCode,
   topOffset = 0,
 }) => {
   const handleLogout = () => {
@@ -86,16 +80,6 @@ export const NavBar: React.FC<NavBarProps> = ({
                 <span className="hidden sm:inline text-sm font-medium text-gray-700 max-w-[150px] truncate">
                   {user.displayName || username}
                 </span>
-                {onOpenTotp && (
-                  <button
-                    onClick={onOpenTotp}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Two-factor authentication"
-                    type="button"
-                  >
-                    <ShieldIcon />
-                  </button>
-                )}
                 <button
                   onClick={handleLogout}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -107,17 +91,6 @@ export const NavBar: React.FC<NavBarProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                {onOpenCode && (
-                  <button
-                    onClick={onOpenCode}
-                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors whitespace-nowrap"
-                    type="button"
-                    title="Use authenticator code"
-                  >
-                    <KeyIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Use code</span>
-                  </button>
-                )}
                 <button
                   onClick={onLogin}
                   disabled={isSigningIn}

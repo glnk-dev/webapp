@@ -4,10 +4,9 @@ import {
   onAuthStateChanged,
   signOut,
   signInWithPopup,
-  signInWithCustomToken,
   GithubAuthProvider,
 } from 'firebase/auth';
-import { auth, githubProvider, verifyTotp } from '../lib/firebase';
+import { auth, githubProvider } from '../lib/firebase';
 import { User } from '../types';
 import { getGlnkUsername, isStatic, isHomepage } from '../utils/env';
 
@@ -18,7 +17,6 @@ interface AuthContextType {
   loginError: string | null;
   githubLogin: string | null;
   loginWithGithub: () => Promise<void>;
-  loginWithTotp: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -131,25 +129,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [siteOwner, loginError, homepageMode]);
 
-  const loginWithTotp = useCallback(async (code: string) => {
-    if (!auth || !verifyTotp) throw new Error('Firebase not configured');
-
-    setLoginError(null);
-    isValidating.current = true;
-
-    try {
-      const { data } = await verifyTotp({ username: siteOwner, code });
-      const result = await signInWithCustomToken(auth, data.token);
-      setUser(toUser(result.user));
-    } catch (error: unknown) {
-      const errCode = (error as { code?: string }).code;
-      setLoginError(errCode === 'functions/permission-denied' ? 'totp_invalid' : 'totp_failed');
-      throw error;
-    } finally {
-      isValidating.current = false;
-    }
-  }, [siteOwner]);
-
   const logout = useCallback(async () => {
     if (auth) await signOut(auth);
     localStorage.removeItem(GITHUB_LOGIN_KEY);
@@ -173,7 +152,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loginError,
         githubLogin,
         loginWithGithub,
-        loginWithTotp,
         logout,
       }}
     >
